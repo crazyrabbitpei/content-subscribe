@@ -31,7 +31,7 @@ def callback(request):
         return HttpResponseBadRequest()
 
     # get X-Line-Signature header value
-    signature = request.META['X-Line-Signature']
+    signature = request.headers['X-Line-Signature']
 
     # get request body as text
     body = request.body.decode('utf-8')
