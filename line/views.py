@@ -5,6 +5,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 import time
 from linebot import (
     LineBotApi, WebhookHandler
