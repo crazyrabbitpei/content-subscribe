@@ -26,10 +26,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '5z*r_7ehb3t&dd(xw)r2@1tyc3a-gkwyoujc*l1&o$anwxhb&*'
 APPEND_SLASH = False
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
+DEBUG = os.getenv('DEBUG') == "True"
+ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTS').split(',')]
 
 # Application definition
 
