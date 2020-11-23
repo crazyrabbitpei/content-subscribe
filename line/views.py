@@ -38,7 +38,7 @@ def callback(request):
     logger.info(f'Receive body: {body}')
     # handle webhook body
     try:
-        handler.handle(body, signature)
+        handler.handle("試試其他句子", signature)
     except InvalidSignatureError:
         logger.error("Invalid signature. Please check your channel access token/channel secret.")
         return HttpResponseForbidden()
