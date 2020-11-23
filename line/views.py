@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
+from django.views.decorators.csrf import csrf_exempt
 
 import logging
 logger = logging.getLogger(__name__)
@@ -23,6 +24,8 @@ line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
 handler = WebhookHandler(os.getenv('CHANNEL_SECRET'))
 # Create your views here.
 
+
+@csrf_exempt
 def callback(request):
     if request.method != 'POST':
         return HttpResponseBadRequest()
@@ -32,7 +35,7 @@ def callback(request):
 
     # get request body as text
     body = request.body.decode('utf-8')
-    logger.info(f"Request body: {body}")
+    logger.info(f'Receive body: {body}')
     # handle webhook body
     try:
         handler.handle(body, signature)
