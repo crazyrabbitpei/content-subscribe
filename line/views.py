@@ -1,5 +1,7 @@
 import traceback
 import sys
+from collections import defaultdict
+
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
@@ -63,35 +65,46 @@ def callback(request):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     patterns = [
-        {"match": {"board": "BoardGame"}},
-        {"match": {"content": "古墓"}},
-        {"match": {"category": "交易"}}
+        #{"match": {"board": "BoardGame"}},
+        {"match": {"content": event.message.text}},
+        #{"match": {"category": "交易"}}
     ]
 
     filters = [
         {"term":  {"is_reply": False}},
         #{"range": {"time": {"gte": "2020-11-19T17:47:03+08:00"}}}
     ]
-    message = find(patterns, filters)
+    message = find(event.message.text, patterns, filters)
 
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=message))
 
 
-def format_message(result):
+def format_message(keyword, result):
     hits = result['hits']['hits']
-    message = f'共有 {len(hits)} 筆結果\n'
-    message += f'--\n'
+    count_board = defaultdict(list)
     for index, hit in enumerate(hits):
-        message += f"{index+1}: {hit['_source']['category']} {hit['_source']['title']}\n"
-        message += f"發文時間: {hit['_source']['time']}\n"
-        message += f"{hit['_source']['url']}\n"
+        count_board[hit['_source']['board']].append(hit)
+
+    board_info = ' ,'.join(
+        [f'{key}({len(value)})' for key, value in count_board.items()])
+
+    message = f'共有 {len(hits)} 筆 {keyword} 結果, {board_info}\n'
+    for board, infos in count_board.items():
+        index = 1
+        meta = board.center(25, '=')
+        message += meta+'\n'
+        for info in infos:
+            message += f"{index}. {info['_source']['category']} {info['_source']['title']}\n"
+            message += f"發文時間: {info['_source']['time']}\n"
+            message += f"{info['_source']['url']}\n"
+            index += 1
     message += f'--\n'
     return message
 
 
-def find(patterns=None, filters=None):
+def find(keyword=None, patterns=None, filters=None):
     search = {
         "query": {
             "bool": {
@@ -101,7 +114,7 @@ def find(patterns=None, filters=None):
         }
     }
     result = client.search(body=search)
-    return format_message(result)
+    return format_message(keyword, result)
 
 def test(request):
     result = {"message": "hello"}
