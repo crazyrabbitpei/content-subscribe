@@ -1,3 +1,5 @@
+import traceback
+import sys
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
@@ -50,8 +52,9 @@ def callback(request):
     except InvalidSignatureError:
         logger.error("Invalid signature. Please check your channel access token/channel secret.")
         return HttpResponseForbidden()
-    except LineBotApiError:
-        logger.error("Line bot api error")
+    except LineBotApiError as e:
+        etype, value, tb = sys.exc_info()
+        logger.error(f"Line bot api errorL {etype}", exc_info=True)
         return HttpResponseBadRequest()
 
     return HttpResponse()
