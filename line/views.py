@@ -65,12 +65,20 @@ def callback(request):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     patterns = [
-        {"match": {"content": f"{event.message.text}"}},
+        {
+            "match": {
+                "content": {
+                    "operator": "and", # 使用and 或 or來決定搜尋字詞(斷詞後)要全部符合或是有其中一項即可，預設or
+                    #"minimum_should_match": 3,  # 若operator為
+                    "query": f"{event.message.text}"
+                }
+            },
+        }
     ]
 
     filters = [
         #{"term":  {"is_reply": False}},
-        #{"range": {"time": {"gte": "2020-11-19T17:47:03+08:00"}}}
+        {"range": {"time": {"gte": "now-15d"}}}
     ]
     message = find(event.message.text, patterns, filters)
 
