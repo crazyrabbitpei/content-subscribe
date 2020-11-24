@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
-
+from elasticsearch import Elasticsearch
 import logging
 logger = logging.getLogger(__name__)
 
@@ -22,9 +22,17 @@ from linebot.models import (
 
 line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
 handler = WebhookHandler(os.getenv('CHANNEL_SECRET'))
+
+client = Elasticsearch(
+    http_auth=(os.getenv('ES_USER'), os.getenv("ES_PASSWD")),
+    hosts=os.getenv('ES_HOSTS').split(','),
+    use_ssl=True,
+    verify_cert=False,
+    ssl_show_warn=False,
+    scheme='https',
+    port=int(os.getenv('ES_PORT')),
+)
 # Create your views here.
-
-
 @csrf_exempt
 def callback(request):
     if request.method != 'POST':
@@ -50,9 +58,27 @@ def callback(request):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    search = {
+        "query": {
+            "bool": {
+                "must": [
+                    {"match": {"board": "BoardGame"}},
+                    {"match": {"content": "古墓"}},
+                    {"match": {"category": "交易"}}
+                ],
+                "filter": [
+                    {"term":  {"is_reply": False}},
+                    {"range": {"time": {"gte": "2020-11-19T17:47:03+08:00"}}}
+                ]
+            }
+        }
+    }
+    result = client.search(body=search)
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text="呆呆的回覆"))
+        TextSendMessage(text=result))
+
 
 def test(request):
-    return JsonResponse({"message": "hello"})
+    result = {"message": "hello"}
+    return JsonResponse(result)
