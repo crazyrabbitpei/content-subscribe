@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from elasticsearch import Elasticsearch
+import json
 import logging
 logger = logging.getLogger(__name__)
 
@@ -79,7 +80,7 @@ def handle_message(event):
     result = client.search(body=search)
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=result))
+        TextSendMessage(text=json.dumps(result)))
 
 
 def test(request):
