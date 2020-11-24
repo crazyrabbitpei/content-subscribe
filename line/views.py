@@ -57,7 +57,7 @@ def callback(request):
         return HttpResponseForbidden()
     except LineBotApiError as e:
         etype, value, tb = sys.exc_info()
-        logger.error(f"Line bot api errorL {etype}", exc_info=True)
+        logger.error(f"Line bot api error {etype}", exc_info=True)
         return HttpResponseBadRequest()
 
     return HttpResponse()
@@ -65,13 +65,11 @@ def callback(request):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     patterns = [
-        #{"match": {"board": "BoardGame"}},
-        {"match": {"content": event.message.text}},
-        #{"match": {"category": "交易"}}
+        {"match": {"content": f"{event.message.text}"}},
     ]
 
     filters = [
-        {"term":  {"is_reply": False}},
+        #{"term":  {"is_reply": False}},
         #{"range": {"time": {"gte": "2020-11-19T17:47:03+08:00"}}}
     ]
     message = find(event.message.text, patterns, filters)
