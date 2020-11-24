@@ -62,26 +62,46 @@ def callback(request):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    patterns = [
+        {"match": {"board": "BoardGame"}},
+        {"match": {"content": "古墓"}},
+        {"match": {"category": "交易"}}
+    ]
+
+    filters = [
+        {"term":  {"is_reply": False}},
+        #{"range": {"time": {"gte": "2020-11-19T17:47:03+08:00"}}}
+    ]
+    message = find(patterns, filters)
+
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=message))
+
+
+def format_message(result):
+    hits = result['hits']['hits']
+    message = f'共有 {len(hits)} 筆結果\n'
+    message += f'--\n'
+    for index, hit in enumerate(hits):
+        message += f"{index+1}: {hit['_source']['category']} {hit['_source']['title']}\n"
+        message += f"發文時間: {hit['_source']['time']}\n"
+        message += f"{hit['_source']['url']}\n"
+    message += f'--\n'
+    return message
+
+
+def find(patterns=None, filters=None):
     search = {
         "query": {
             "bool": {
-                "must": [
-                    {"match": {"board": "BoardGame"}},
-                    {"match": {"content": "古墓"}},
-                    {"match": {"category": "交易"}}
-                ],
-                "filter": [
-                    {"term":  {"is_reply": False}},
-                    {"range": {"time": {"gte": "2020-11-19T17:47:03+08:00"}}}
-                ]
+                "must": patterns,
+                "filter": filters
             }
         }
     }
     result = client.search(body=search)
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=json.dumps(result)))
-
+    return format_message(result)
 
 def test(request):
     result = {"message": "hello"}
