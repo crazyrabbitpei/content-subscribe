@@ -83,8 +83,7 @@ def handle_message(event):
     print(type(event))
     print(type(event.source))
     print(dir(event.source))
-    source = event.source.as_json_dict()
-    print(source.userId)
+    print(event.source.user_id)
     try:
         line_bot_api.reply_message(
             event.reply_token,
