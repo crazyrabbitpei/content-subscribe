@@ -65,11 +65,11 @@ def callback(request):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     # logger.info(json.dumps(event))
-    try:
-        with open('event.record', 'w') as fp:
-            json.dump(event, fp, indent=2, ensure_ascii=False)
-    except:
-        logger.error(exc_info=True)
+    # try:
+    #     with open('event.record', 'w') as fp:
+    #         json.dump(event, fp, indent=2, ensure_ascii=False)
+    # except:
+    #     logger.error(exc_info=True)
     # patterns = [
     #     {
     #         "match": {
