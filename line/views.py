@@ -80,7 +80,8 @@ def handle_message(event):
     #     {"range": {"time": {"gte": "now-15d"}}}
     # ]
     # message = find(event.message.text, patterns, filters)
-    print(event.source.userId)
+    print(type(event))
+    print(event.source)
     try:
         line_bot_api.reply_message(
             event.reply_token,
