@@ -22,7 +22,7 @@ from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
 )
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage, QuickReplyButton
+    MessageEvent, TextMessage, TextSendMessage
 )
 
 line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
@@ -64,11 +64,12 @@ def callback(request):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    try:
-        with open('event.record', 'w') as fp:
-            json.dump(event, fp, indent=2, ensure_ascii=False)
-    except:
-        logger.error(exc_info=True)
+    logger.info(json.dumps(event))
+    # try:
+    #     with open('event.record', 'w') as fp:
+    #         json.dump(event, fp, indent=2, ensure_ascii=False)
+    # except:
+    #     logger.error(exc_info=True)
     # patterns = [
     #     {
     #         "match": {
