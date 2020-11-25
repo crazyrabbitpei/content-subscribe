@@ -48,7 +48,6 @@ def callback(request):
 
     # get request body as text
     body = request.body.decode('utf-8')
-    logger.info(f'Receive body: {body}')
     # handle webhook body
     try:
         handler.handle(body, signature)
@@ -62,9 +61,8 @@ def callback(request):
 
     return HttpResponse()
 
-@handler.add(MessageEvent, message=TextMessage)
+@handler.add(MessageEvent, message=TextMessage, )
 def handle_message(event):
-    logger.info(event.source.userId)
     # try:
     #     with open('event.record', 'w') as fp:
     #         json.dump(event, fp, indent=2, ensure_ascii=False)
@@ -87,6 +85,7 @@ def handle_message(event):
     #     {"range": {"time": {"gte": "now-15d"}}}
     # ]
     # message = find(event.message.text, patterns, filters)
+    print(event)
     try:
         line_bot_api.reply_message(
             event.reply_token,
