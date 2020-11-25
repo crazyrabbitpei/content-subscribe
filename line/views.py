@@ -64,33 +64,33 @@ def callback(request):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    logger.info(json.dumps(event))
+    # logger.info(json.dumps(event))
     # try:
     #     with open('event.record', 'w') as fp:
     #         json.dump(event, fp, indent=2, ensure_ascii=False)
     # except:
     #     logger.error(exc_info=True)
-    # patterns = [
-    #     {
-    #         "match": {
-    #             "content": {
-    #                 "operator": "and", # 使用and 或 or來決定搜尋字詞(斷詞後)要全部符合或是有其中一項即可，預設or
-    #                 #"minimum_should_match": 3,  # 若operator為
-    #                 "query": f"{event.message.text}"
-    #             }
-    #         },
-    #     }
-    # ]
+    patterns = [
+        {
+            "match": {
+                "content": {
+                    "operator": "and", # 使用and 或 or來決定搜尋字詞(斷詞後)要全部符合或是有其中一項即可，預設or
+                    #"minimum_should_match": 3,  # 若operator為
+                    "query": f"{event.message.text}"
+                }
+            },
+        }
+    ]
 
-    # filters = [
-    #     #{"term":  {"is_reply": False}},
-    #     {"range": {"time": {"gte": "now-15d"}}}
-    # ]
-    # message = find(event.message.text, patterns, filters)
+    filters = [
+        #{"term":  {"is_reply": False}},
+        {"range": {"time": {"gte": "now-15d"}}}
+    ]
+    message = find(event.message.text, patterns, filters)
     try:
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text='hello'))
+            TextSendMessage(text=message))
     except LineBotApiError as e:
         etype, value, tb = sys.exc_info()
         logger.error(f'Reply api error {etype}', exc_info=True)
