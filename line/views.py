@@ -140,6 +140,8 @@ def find(keyword=None, patterns=None, filters=None):
     result = client.search(body=search)
     return format_message(keyword, result)
 
-def test(request):
-    result = {"message": "hello"}
-    return JsonResponse(result)
+def push_notice(request):
+    try:
+        line_bot_api.push_message('U2b3104fdaef9c190510326b414c1611d', TextSendMessage(text='主動通知~'))
+    except:
+        logger.error('主動通知失敗')

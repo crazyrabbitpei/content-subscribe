@@ -3,5 +3,5 @@ from . import views
 
 urlpatterns = [
     path('callback/', views.callback),
-    path('test/', views.test),
+    path('test/', views.push_notice),
 ]
