@@ -22,7 +22,7 @@ from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
 )
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage
+    MessageEvent, FollowEvent, UnfollowEvent, TextMessage, TextSendMessage
 )
 
 line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
@@ -61,8 +61,22 @@ def callback(request):
 
     return HttpResponse()
 
-@handler.add(MessageEvent, message=TextMessage, )
-def handle_message(event):
+
+@handler.add(FollowEvent)
+def follow(event):
+    try:
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(
+            text=f'你的user id: {event.source.user_id}'))
+    except:
+        logger.error('Follow error', exc_info=True)
+
+
+@handler.add(UnfollowEvent)
+def unfollow(event):
+    logger.info(f'{event.source.user_id} unfollow you')
+
+@handler.add(MessageEvent, message=TextMessage)
+def echo(event):
     # patterns = [
     #     {
     #         "match": {
@@ -80,9 +94,6 @@ def handle_message(event):
     #     {"range": {"time": {"gte": "now-15d"}}}
     # ]
     # message = find(event.message.text, patterns, filters)
-    print(dir(event))
-    print(dir(event.source))
-    print(event.source.user_id)
     try:
         line_bot_api.reply_message(
             event.reply_token,
