@@ -63,11 +63,6 @@ def callback(request):
 
 @handler.add(MessageEvent, message=TextMessage, )
 def handle_message(event):
-    # try:
-    #     with open('event.record', 'w') as fp:
-    #         json.dump(event, fp, indent=2, ensure_ascii=False)
-    # except:
-    #     logger.error(exc_info=True)
     # patterns = [
     #     {
     #         "match": {
@@ -85,7 +80,7 @@ def handle_message(event):
     #     {"range": {"time": {"gte": "now-15d"}}}
     # ]
     # message = find(event.message.text, patterns, filters)
-    print(event)
+    print(event.source.userId)
     try:
         line_bot_api.reply_message(
             event.reply_token,
