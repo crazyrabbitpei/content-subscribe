@@ -64,7 +64,7 @@ def callback(request):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    logger.info(json.dumps(event))
+    logger.info(event.source.userId)
     # try:
     #     with open('event.record', 'w') as fp:
     #         json.dump(event, fp, indent=2, ensure_ascii=False)
