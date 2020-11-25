@@ -70,23 +70,23 @@ def handle_message(event):
     #         json.dump(event, fp, indent=2, ensure_ascii=False)
     # except:
     #     logger.error(exc_info=True)
-    patterns = [
-        {
-            "match": {
-                "content": {
-                    "operator": "and", # 使用and 或 or來決定搜尋字詞(斷詞後)要全部符合或是有其中一項即可，預設or
-                    #"minimum_should_match": 3,  # 若operator為
-                    "query": f"{event.message.text}"
-                }
-            },
-        }
-    ]
+    # patterns = [
+    #     {
+    #         "match": {
+    #             "content": {
+    #                 "operator": "and", # 使用and 或 or來決定搜尋字詞(斷詞後)要全部符合或是有其中一項即可，預設or
+    #                 #"minimum_should_match": 3,  # 若operator為
+    #                 "query": f"{event.message.text}"
+    #             }
+    #         },
+    #     }
+    # ]
 
-    filters = [
-        #{"term":  {"is_reply": False}},
-        {"range": {"time": {"gte": "now-15d"}}}
-    ]
-    message = find(event.message.text, patterns, filters)
+    # filters = [
+    #     #{"term":  {"is_reply": False}},
+    #     {"range": {"time": {"gte": "now-15d"}}}
+    # ]
+    # message = find(event.message.text, patterns, filters)
     try:
         line_bot_api.reply_message(
             event.reply_token,
