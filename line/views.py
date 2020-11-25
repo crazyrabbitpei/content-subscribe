@@ -81,7 +81,8 @@ def handle_message(event):
     # ]
     # message = find(event.message.text, patterns, filters)
     print(type(event))
-    print(event.source)
+    print(type(event.source))
+    print(event.source['userId'])
     try:
         line_bot_api.reply_message(
             event.reply_token,
