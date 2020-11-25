@@ -22,7 +22,7 @@ from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
 )
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage,
+    MessageEvent, TextMessage, TextSendMessage, QuickReplyButton
 )
 
 line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
@@ -64,28 +64,32 @@ def callback(request):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    patterns = [
-        {
-            "match": {
-                "content": {
-                    "operator": "and", # 使用and 或 or來決定搜尋字詞(斷詞後)要全部符合或是有其中一項即可，預設or
-                    #"minimum_should_match": 3,  # 若operator為
-                    "query": f"{event.message.text}"
-                }
-            },
-        }
-    ]
+    with open('event.record', 'w') as fp:
+        json.dump(event, fp, indent=2, ensure_ascii=False)
+    # patterns = [
+    #     {
+    #         "match": {
+    #             "content": {
+    #                 "operator": "and", # 使用and 或 or來決定搜尋字詞(斷詞後)要全部符合或是有其中一項即可，預設or
+    #                 #"minimum_should_match": 3,  # 若operator為
+    #                 "query": f"{event.message.text}"
+    #             }
+    #         },
+    #     }
+    # ]
 
-    filters = [
-        #{"term":  {"is_reply": False}},
-        {"range": {"time": {"gte": "now-15d"}}}
-    ]
-    message = find(event.message.text, patterns, filters)
-
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=message))
-
+    # filters = [
+    #     #{"term":  {"is_reply": False}},
+    #     {"range": {"time": {"gte": "now-15d"}}}
+    # ]
+    # message = find(event.message.text, patterns, filters)
+    try:
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text='hello'))
+    except LineBotApiError as e:
+        etype, value, tb = sys.exc_info()
+        logger.error(f'Reply api error {etype}', exc_info=True)
 
 def format_message(keyword, result):
     hits = result['hits']['hits']
