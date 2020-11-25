@@ -80,8 +80,7 @@ def handle_message(event):
     #     {"range": {"time": {"gte": "now-15d"}}}
     # ]
     # message = find(event.message.text, patterns, filters)
-    print(type(event))
-    print(type(event.source))
+    print(dir(event))
     print(dir(event.source))
     print(event.source.user_id)
     try:
