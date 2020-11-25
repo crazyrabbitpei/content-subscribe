@@ -8,6 +8,9 @@ from django.views.decorators.csrf import csrf_exempt
 from elasticsearch import Elasticsearch
 import json
 import logging
+import logging.config
+
+logging.config.fileConfig('logging.ini', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
 
 import os
