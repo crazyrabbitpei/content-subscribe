@@ -67,6 +67,7 @@ def callback(request):
 
 @handler.add(FollowEvent)
 def follow(event):
+    # TODO: 加入使用者id到db
     try:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(
             text=f'你的user id: {event.source.user_id}'))
@@ -76,10 +77,27 @@ def follow(event):
 
 @handler.add(UnfollowEvent)
 def unfollow(event):
+    # TODO: db刪除使用者id
     logger.info(f'{event.source.user_id} unfollow you')
 
 @handler.add(MessageEvent, message=TextMessage)
 def echo(event):
+    # TODO
+    '''
+    1. 訂閱關鍵字操作
+        - 下特殊指令視為開始輸入訂閱字
+        - 下特殊指令視為結束輸入訂閱字
+        - 回傳當前訂閱字做確認
+        - 確認訂閱字
+            - 特殊字符確認
+            - 特殊字符修改
+        - 關鍵字加入db
+            - keyword db
+            - user db
+            - user-keyword many-to-many db
+        - 回傳成功訂閱結果
+    '''
+
     # patterns = [
     #     {
     #         "match": {
@@ -104,6 +122,13 @@ def echo(event):
     except LineBotApiError as e:
         etype, value, tb = sys.exc_info()
         logger.error(f'Reply api error {etype}', exc_info=True)
+
+def push_notice(request):
+    try:
+        line_bot_api.push_message(
+            'U2b3104fdaef9c190510326b414c1611d', TextSendMessage(text='主動通知~'))
+    except:
+        logger.error('主動通知失敗')
 
 def format_message(keyword, result):
     hits = result['hits']['hits']
@@ -140,8 +165,4 @@ def find(keyword=None, patterns=None, filters=None):
     result = client.search(body=search)
     return format_message(keyword, result)
 
-def push_notice(request):
-    try:
-        line_bot_api.push_message('U2b3104fdaef9c190510326b414c1611d', TextSendMessage(text='主動通知~'))
-    except:
-        logger.error('主動通知失敗')
+
