@@ -4,6 +4,7 @@ import traceback
 import sys
 from collections import defaultdict
 
+from django.utils.translation import gettext_lazy as _
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
@@ -70,14 +71,13 @@ def callback(request):
 
 @handler.add(FollowEvent)
 def follow(event):
-    message = '註冊成功，可以開始訂閱關鍵字囉'
-    # TODO: 加入使用者id到db
+    message = _('註冊成功，可以開始訂閱關鍵字囉')
     try:
         User.objects.create(user_id=event.source.user_id)
     except:
         etype, value, tb = sys.exc_info()
         logger.error(f'使用者加入失敗 {etype}', exc_info=True)
-        message = '註冊失敗QQ，請先封鎖後再解封所試試'
+        message = _('註冊失敗QQ，請先封鎖後再解封所試試')
 
     try:
         line_bot_api.reply_message(event.reply_token, TextSendMessage(
@@ -88,7 +88,6 @@ def follow(event):
 
 @handler.add(UnfollowEvent)
 def unfollow(event):
-    # TODO: db刪除使用者id
     try:
         user = User.objects.get(user_id=event.source.user_id)
         user.delete()
@@ -136,7 +135,7 @@ def echo(event):
     try:
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text="hello"))
+            TextSendMessage(text=_("hello")))
     except LineBotApiError as e:
         etype, value, tb = sys.exc_info()
         logger.error(f'Reply api error {etype}', exc_info=True)
@@ -144,7 +143,8 @@ def echo(event):
 def push_notice(request):
     try:
         line_bot_api.push_message(
-            'U2b3104fdaef9c190510326b414c1611d', TextSendMessage(text='主動通知~'))
+            'U2b3104fdaef9c190510326b414c1611d', TextSendMessage(
+                text=_('主動通知~')))
     except:
         logger.error('主動通知失敗')
 
