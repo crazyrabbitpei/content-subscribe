@@ -1,3 +1,5 @@
+from line.models import User, Keyword
+
 import traceback
 import sys
 from collections import defaultdict
@@ -9,6 +11,7 @@ from elasticsearch import Elasticsearch
 import json
 import logging
 import logging.config
+
 
 logging.config.fileConfig('logging.ini', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
@@ -67,18 +70,33 @@ def callback(request):
 
 @handler.add(FollowEvent)
 def follow(event):
+    message = '註冊成功，可以開始訂閱關鍵字囉'
     # TODO: 加入使用者id到db
     try:
-        line_bot_api.reply_message(event.reply_token, TextSendMessage(
-            text=f'你的user id: {event.source.user_id}'))
+        User.objects.create(user_id=event.source.user_id)
     except:
-        logger.error('Follow error', exc_info=True)
+        etype, value, tb = sys.exc_info()
+        logger.error(f'使用者加入失敗 {etype}', exc_info=True)
+        message = '註冊失敗QQ，請先封鎖後再解封所試試'
+
+    try:
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(
+            text=f'{message}'))
+    except:
+        logger.error('Reply error', exc_info=True)
 
 
 @handler.add(UnfollowEvent)
 def unfollow(event):
     # TODO: db刪除使用者id
-    logger.info(f'{event.source.user_id} unfollow you')
+    try:
+        user = User.objects.get(user_id=event.source.user_id)
+        user.delete()
+    except:
+        logger.error(f'無法刪除使用者 {event.source.user_id}')
+    else:
+        logger.info(f'{event.source.user_id} 成功unfollow')
+
 
 @handler.add(MessageEvent, message=TextMessage)
 def echo(event):
