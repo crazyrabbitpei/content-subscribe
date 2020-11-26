@@ -132,10 +132,11 @@ def echo(event):
     #     {"range": {"time": {"gte": "now-15d"}}}
     # ]
     # message = find(event.message.text, patterns, filters)
+    message = _("hello")
     try:
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text="hello"))
+            TextSendMessage(text=message))
     except LineBotApiError as e:
         etype, value, tb = sys.exc_info()
         logger.error(f'Reply api error {etype}', exc_info=True)
