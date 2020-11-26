@@ -145,10 +145,11 @@ def push_notice(request):
     message = _('主動通知~')
     try:
         line_bot_api.push_message(
-            'U2b3104fdaef9c190510326b414c1611d', TextSendMessage(
-                text=f'{message}'))
+            'U2b3104fdaef9c190510326b414c1611d', TextSendMessage(text=f'{message}'))
     except:
         logger.error('主動通知失敗')
+
+    return JsonResponse({"message": "ok"})
 
 def format_message(keyword, result):
     hits = result['hits']['hits']
