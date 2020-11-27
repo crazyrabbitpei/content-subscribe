@@ -85,7 +85,7 @@ def unfollow(event):
         logger.info(f'{event.source.user_id} 成功unfollow')
 
 
-@handler.add(MessageEvent, message=TextMessage)
+@handler.add(MessageEvent)
 def echo(event):
     message = None
     try:
