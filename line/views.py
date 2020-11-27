@@ -87,6 +87,7 @@ def unfollow(event):
 
 @handler.add(MessageEvent)
 def echo(event):
+    logger.debug(f'Recive messaage type: {event.message.type}')
     message = None
     try:
         user = User.objects.get(pk=event.source.user_id)
@@ -101,7 +102,7 @@ def echo(event):
         else:
             message = err_msg
 
-    logger.debug(f'Recive messaage type: {event.message.type}, {json.dumps(oids)}')
+
     try:
         line_bot_api.reply_message(
             event.reply_token,
