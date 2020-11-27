@@ -10,7 +10,6 @@ class User(models.Model):
         ('0', _('Free')),  # 還沒進入任何命令狀態
         ('1', _('Subscribing')),  # 正在輸入關鍵字
         ('2', _('Confirming')),  # 正在確認關鍵字
-        ('3', _('Editing')),  # 正在修改關鍵字
     )
     status = models.CharField(
         _('status'), max_length=2, choices=COMMAND_STATUS, default='0', help_text=_('Typing status'))
@@ -26,7 +25,7 @@ class User(models.Model):
     display_keyword.short_description = _('Subscribe keyword')
 
 class Keyword(models.Model):
-    keyword = models.CharField(_('Keyword'), max_length=15, help_text=_("keyword"))
+    keyword = models.CharField(_('Keyword'), max_length=15, help_text=_("keyword"), unique=True, null=False, blank=False)
     create_time = models.DateTimeField(_("Create time"), auto_now_add=True)
     user_id = models.ManyToManyField(User, verbose_name=_('User'), blank=True)
 
@@ -34,7 +33,7 @@ class Keyword(models.Model):
         ordering = ['create_time']
 
     def __str__(self):
-        return f'{self.keyword}, 加入日期 {self.create_time}'
+        return f'{self.keyword}, create date {self.create_time}'
 
     def display_user_id(self):
         return ','.join([id for id in self.user_id.all()])
