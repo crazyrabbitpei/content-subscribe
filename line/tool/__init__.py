@@ -112,7 +112,7 @@ def subscribe_keyword(user):
             keys.append(Keyword(keyword=key))
             if not Keyword.objects.filter(keyword=key).exists():
                 key.save()
-        user.keyword_set.add(keys)
+        user.keyword_set.add(*keys)
     except:
         etype, value, tb = sys.exc_info()
         logger.error(f'關鍵字加入失敗 {etype}', exc_info=True)
