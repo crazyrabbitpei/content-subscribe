@@ -3,7 +3,7 @@ from .models import User, Keyword
 
 # Register your models here.
 class KeywordInline(admin.TabularInline):
-    model = Keyword.user_id.through
+    model = Keyword.users.through
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
