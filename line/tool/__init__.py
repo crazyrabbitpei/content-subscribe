@@ -40,7 +40,7 @@ KEYWORD_TMP = defaultdict(list)
 def detect_message_type(event):
     try:
         if event.message.type == 'text':
-            emojis = event.message.get('emojis', None)
+            emojis = event.message.emojis
             if emojis:
                 return ('emoji', [(e.product_id, e.emoji_id) for e in emojis])
             else:
