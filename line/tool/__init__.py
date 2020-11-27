@@ -86,6 +86,7 @@ def action(user, /, *, mtype, message=None):
             KEYWORD_TMP[user.pk].clear()
         elif mtype == 'text':
             if message.strip() == '0':
+                user.status = '0'
                 msg = '此次輸入的關鍵字已都移除，若要重新開始訂閱請輸入一個emoji'
                 KEYWORD_TMP[user.pk].clear()
             else:
