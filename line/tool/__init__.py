@@ -58,7 +58,7 @@ def action(user, /, *, mtype, message=None):
     err_msg = None
     ok = False
     if user.status == '0':
-        if mtype == 'emoji':
+        if mtype == 'emoji' or mtype == 'sticker':
             user.status = '1'
             msg = '可以開始輸入關鍵字囉'
             ok = True
@@ -67,7 +67,7 @@ def action(user, /, *, mtype, message=None):
             msg = find(message, es_search_patterns, es_search_patterns)
             ok = True
     elif user.status == '1':
-        if mtype == 'emoji':
+        if mtype == 'emoji' or mtype == 'sticker':
             user.status = '2'
             msg = format_keyword_confirm_message(user)
             ok = True
@@ -76,7 +76,7 @@ def action(user, /, *, mtype, message=None):
             msg = '繼續輸入下一筆，或是用一個emoji來結束關鍵字輸入'
             ok = True
     elif user.status == '2':
-        if mtype == 'emoji':
+        if mtype == 'emoji' or mtype == 'sticker':
             user.status = '0'
             if not store_keyword_to_db(user):
                 err_msg = f'關鍵字加入失敗，請重新操作'
