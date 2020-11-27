@@ -44,11 +44,11 @@ def detect_message_type(event):
             if emojis:
                 return ('emoji', [(e.product_id, e.emoji_id) for e in emojis])
             else:
-                return 'text'
+                return ('text', None)
         if event.message.type == 'sticker':
             return ('sticker', [(event.message.package_id, event.message.sticker_id)])
     except:
-        logger.error('判斷使用者所發出的訊息類別錯誤')
+        logger.error('判斷使用者所發出的訊息類別錯誤', exc_info=True)
 
     return (None, None)
 
@@ -99,7 +99,7 @@ def action(user, /, *, mtype, message):
     try:
         user.save()
     except:
-        logger.error('無法將關鍵字儲存到db')
+        logger.error('無法將關鍵字儲存到db', exc_info=True)
 
     return ok, msg, err_msg
 
@@ -157,6 +157,6 @@ def find(keyword=None, patterns=None, filters=None):
     try:
         result = client.search(body=search)
     except:
-        logger.error('搜尋db失敗')
+        logger.error('搜尋db失敗', exc_info=True)
 
     return format_searh_message(keyword, result)
