@@ -93,7 +93,7 @@ def action(user, /, *, mtype, message=None):
                 numbers = [int(n) if int(n) > 0 and int(n) <= len(
                     KEYWORD_TMP[user.pk]) else -1 for n in message.split(' ') if n.isnumeric()]
                 remove_keys = []
-                for n in numbers.sort(reverse=True):
+                for n in sorted(numbers, reverse=True):
                     remove_keys.append(KEYWORD_TMP[user.pk].pop(n-1))
                 msg = f'已移除關鍵字: {",".join(remove_keys)}\n'
                 msg += format_keyword_confirm_message(user)
