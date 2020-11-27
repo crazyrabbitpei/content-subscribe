@@ -95,7 +95,7 @@ def echo(event):
         message = _(f'好像出了問題，請試著先封鎖帳號再解封鎖試試')
     else:
         mtype, oids = detect_message_type(event)
-        ok, msg, err_msg = action(user, mtype=mtype, message=event.message.text)
+        ok, msg, err_msg = action(user, mtype=mtype, message=event.message.text.strip())
         if ok:
             message = msg
         else:
