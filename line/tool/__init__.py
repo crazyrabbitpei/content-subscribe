@@ -78,7 +78,7 @@ def action(user, /, *, mtype, message=None):
     elif user.status == '2':
         if mtype == 'emoji' or mtype == 'sticker':
             user.status = '0'
-            if not store_keyword_to_db(user):
+            if not subscribe_keyword(user):
                 err_msg = f'關鍵字加入失敗，請重新操作'
             else:
                 msg = f'成功訂閱關鍵字: {",".join(KEYWORD_TMP[user.pk])}'
@@ -105,12 +105,14 @@ def action(user, /, *, mtype, message=None):
 
     return ok, msg, err_msg
 
-def store_keyword_to_db(user):
-    keys = [Keyword(keyword=key) for key in KEYWORD_TMP[user.pk]]
+def subscribe_keyword(user):
+    keys = []
     try:
-        for key in keys:
-            key.save()
-        user.keyword_set.add(*keys)
+        for key in KEYWORD_TMP[user.pk]:
+            keys.append(Keyword(keyword=key))
+            if not Keyword.objects.filter(keyword=key).exists():
+                key.save()
+        user.keyword_set.add(keys)
     except:
         etype, value, tb = sys.exc_info()
         logger.error(f'關鍵字加入失敗 {etype}', exc_info=True)
