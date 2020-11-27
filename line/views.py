@@ -1,23 +1,21 @@
+import logging
 import json
 import time
-from line.models import User, Keyword
-from line.tool import detect_message_type, action
-
+import os
 import traceback
 import sys
 from collections import defaultdict
+from dotenv import load_dotenv
+load_dotenv()
+
+from line.models import User, Keyword
+from line.tool import detect_message_type, action
 
 from django.utils.translation import gettext_lazy as _
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotFound
 from django.views.decorators.csrf import csrf_exempt
 
-import logging
-logger = logging.getLogger(__name__)
-
-import os
-from dotenv import load_dotenv
-load_dotenv()
 
 from linebot import (
     LineBotApi, WebhookHandler
@@ -29,6 +27,7 @@ from linebot.models import (
     MessageEvent, FollowEvent, UnfollowEvent, TextMessage, TextSendMessage
 )
 
+logger = logging.getLogger(__name__)
 line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
 handler = WebhookHandler(os.getenv('CHANNEL_SECRET'))
 
@@ -98,12 +97,12 @@ def echo(event):
         user_message = None
         if mtype == 'text':
             user_message = event.message.text.strip()
-        ok, msg, err_msg = action(user, mtype=mtype, message=user_message)
+        result = action(user, mtype=mtype, message=user_message)
 
-        if ok:
-            message = msg
+        if result['ok']:
+            message = result['msg']
         else:
-            message = err_msg
+            message = result['err_msg']
 
 
     try:
