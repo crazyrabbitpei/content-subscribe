@@ -105,9 +105,11 @@ def action(user, /, *, mtype, message=None):
     return ok, msg, err_msg
 
 def store_keyword_to_db(user):
-    bulk = [Keyword(user_id=user.pk, keyword=key) for key in KEYWORD_TMP[user.pk]]
+    keys = [Keyword(keyword=key) for key in KEYWORD_TMP[user.pk]]
     try:
-        Keyword.objects.bulk_create(bulk)
+        for key in keys:
+            key.save()
+        user.keyword_set.add(*keys)
     except:
         etype, value, tb = sys.exc_info()
         logger.error(f'關鍵字加入失敗 {etype}', exc_info=True)
