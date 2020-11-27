@@ -87,7 +87,6 @@ def unfollow(event):
 
 @handler.add(MessageEvent)
 def echo(event):
-    logger.debug(f'Recive messaage type: {event.message.type}')
     message = None
     try:
         user = User.objects.get(pk=event.source.user_id)
@@ -96,7 +95,11 @@ def echo(event):
         message = _(f'好像出了問題，請試著先封鎖帳號再解封鎖試試')
     else:
         mtype, oids = detect_message_type(event)
-        ok, msg, err_msg = action(user, mtype=mtype, message=event.message.text.strip())
+        user_message = None
+        if mtype == 'text':
+            user_message = event.message.text.strip()
+        ok, msg, err_msg = action(user, mtype=mtype, message=user_message)
+
         if ok:
             message = msg
         else:
