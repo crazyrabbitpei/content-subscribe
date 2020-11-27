@@ -52,7 +52,8 @@ def detect_message_type(event):
 
     return (None, None)
 
-def action(user, /, *, mtype, message):
+def action(user, /, *, mtype, message=None):
+    logger.info(f'mtype: {mtype}, message: {message}')
     msg = None
     err_msg = None
     ok = False
