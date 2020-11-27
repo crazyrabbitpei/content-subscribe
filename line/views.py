@@ -101,22 +101,27 @@ def echo(event):
             message = result['msg']
         else:
             message = result['err_msg']
-
+    # TODO: 傳送confirm button確認訂閱資訊
+    # TODO: 傳送Carousel template顯示搜尋結果
     # TemplateSendMessage(
     #     template=ConfirmTemplate(
-    #        text=_('確認無誤?'),
+    #        text=_(f'{message}'),
     #        actions=[
     #            MessageAction(
     #                label=_('是'),
-    #                text='\uf60d'
-    #            )
+    #                text='😀'
+    #            ),
+    #            MessageAction(
+    #                label=_(''),
+    #                text=''
+    #            ),
     #        ]
     #     )
     # )
     try:
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text='😀'))
+            TextSendMessage(text=message))
     except LineBotApiError as e:
         etype, value, tb = sys.exc_info()
         logger.error(f'Reply api error {etype}', exc_info=True)
