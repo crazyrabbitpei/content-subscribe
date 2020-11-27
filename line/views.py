@@ -24,7 +24,7 @@ from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
 )
 from linebot.models import (
-    MessageEvent, FollowEvent, UnfollowEvent, TextMessage, TextSendMessage
+    MessageEvent, FollowEvent, UnfollowEvent, TextSendMessage, TemplateSendMessage, ButtonsTemplate, ConfirmTemplate, CarouselTemplate, MessageAction
 )
 
 logger = logging.getLogger(__name__)
@@ -71,7 +71,6 @@ def follow(event):
         except:
             logger.error('Reply error', exc_info=True)
 
-
 @handler.add(UnfollowEvent)
 def unfollow(event):
     try:
@@ -103,11 +102,21 @@ def echo(event):
         else:
             message = result['err_msg']
 
-
+    # TemplateSendMessage(
+    #     template=ConfirmTemplate(
+    #        text=_('確認無誤?'),
+    #        actions=[
+    #            MessageAction(
+    #                label=_('是'),
+    #                text='\uf60d'
+    #            )
+    #        ]
+    #     )
+    # )
     try:
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=f'{message}'))
+            TextSendMessage(text='\uf60d'))
     except LineBotApiError as e:
         etype, value, tb = sys.exc_info()
         logger.error(f'Reply api error {etype}', exc_info=True)
