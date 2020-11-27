@@ -1,13 +1,15 @@
 import sys, os
-from dotenv import load_dotenv
 import logging
 from collections import defaultdict
+from dotenv import load_dotenv
+load_dotenv()
+
 from line.models import Keyword, User
 
-load_dotenv()
+from elasticsearch import Elasticsearch
+
 logger = logging.getLogger(__name__)
 
-from elasticsearch import Elasticsearch
 client = Elasticsearch(
     http_auth=(os.getenv('ES_USER'), os.getenv("ES_PASSWD")),
     hosts=os.getenv('ES_HOSTS').split(','),
@@ -53,57 +55,72 @@ def detect_message_type(event):
     return (None, None)
 
 def action(user, /, *, mtype, message=None):
-    logger.info(f'mtype: {mtype}, message: {message}')
-    msg = None
-    err_msg = None
-    ok = False
+    logger.info(f'User action, current status: {user.status}, mtype: {mtype}, message: {message}')
+    result = {
+        'ok': False,
+        'msg': None,
+        'err_msg': None,
+    }
+
     if user.status == '0':
-        if mtype == 'emoji' or mtype == 'sticker':
-            user.status = '1'
-            msg = '可以開始輸入關鍵字囉'
-            ok = True
-        elif mtype == 'text':
-            es_search_patterns[0]['match']['content']['query'] = message
-            msg = find(message, es_search_patterns, es_search_patterns)
-            ok = True
+        action_0(user, result, mtype, message)
     elif user.status == '1':
-        if mtype == 'emoji' or mtype == 'sticker':
-            user.status = '2'
-            msg = format_keyword_confirm_message(user)
-            ok = True
-        elif mtype == 'text':
-            KEYWORD_TMP[user.pk].append(message)
-            msg = '繼續輸入下一筆，或是用一個emoji來結束關鍵字輸入'
-            ok = True
+        action_1(user, result, mtype, message)
     elif user.status == '2':
-        if mtype == 'emoji' or mtype == 'sticker':
-            user.status = '0'
-            if not subscribe_keyword(user):
-                err_msg = f'關鍵字加入失敗，請重新操作'
-            else:
-                msg = f'成功訂閱關鍵字: {",".join(KEYWORD_TMP[user.pk])}'
-                ok = True
-            KEYWORD_TMP[user.pk].clear()
-        elif mtype == 'text':
-            if message.strip() == '0':
-                user.status = '0'
-                msg = '此次輸入的關鍵字已都移除，若要重新開始訂閱請輸入一個emoji'
-                KEYWORD_TMP[user.pk].clear()
-            else:
-                numbers = [int(n) if int(n) > 0 and int(n) <= len(
-                    KEYWORD_TMP[user.pk]) else -1 for n in message.split(' ') if n.isnumeric()]
-                remove_keys = []
-                for n in sorted(numbers, reverse=True):
-                    remove_keys.append(KEYWORD_TMP[user.pk].pop(n-1))
-                msg = f'已移除關鍵字: {",".join(remove_keys)}\n'
-                msg += format_keyword_confirm_message(user)
-            ok = True
+        action_2(user, result, mtype, message)
     try:
         user.save()
     except:
         logger.error('無法將關鍵字儲存到db', exc_info=True)
 
-    return ok, msg, err_msg
+    return result
+
+def action_0(user, result, mtype, message=None):
+    if is_emoji_or_sticker(mtype):
+        user.status = '1'
+        result['msg'] = '可以開始輸入關鍵字囉'
+        result['ok'] = True
+    elif mtype == 'text':
+        es_search_patterns[0]['match']['content']['query'] = message
+        result['msg'] = find(message, es_search_patterns, es_search_patterns)
+        result['ok'] = True
+
+def action_1(user, result, mtype, message=None):
+    if is_emoji_or_sticker(mtype):
+        user.status = '2'
+        result['msg'] = format_keyword_confirm_message(user)
+        result['ok'] = True
+    elif mtype == 'text':
+        KEYWORD_TMP[user.pk].append(message)
+        result['msg'] = '繼續輸入下一筆，或是用一個emoji來結束關鍵字輸入'
+        result['ok'] = True
+
+def action_2(user, result, mtype, message=None):
+    if is_emoji_or_sticker(mtype):
+        user.status = '0'
+        if not subscribe_keyword(user):
+            result['err_msg'] = f'關鍵字加入失敗，請重新操作'
+        else:
+            result['msg'] = f'成功訂閱關鍵字: {",".join(KEYWORD_TMP[user.pk])}'
+            result['ok'] = True
+        KEYWORD_TMP[user.pk].clear()
+    elif mtype == 'text':
+        if message.strip() == '0':
+            user.status = '0'
+            result['msg'] = '此次輸入的關鍵字已都移除，若要重新開始訂閱請輸入一個emoji'
+            KEYWORD_TMP[user.pk].clear()
+        else:
+            numbers = [int(n) if int(n) > 0 and int(n) <= len(
+                KEYWORD_TMP[user.pk]) else -1 for n in message.split(' ') if n.isnumeric()]
+            remove_keys = []
+            for n in sorted(numbers, reverse=True):
+                remove_keys.append(KEYWORD_TMP[user.pk].pop(n-1))
+            result['msg'] = f'已移除關鍵字: {",".join(remove_keys)}\n'
+            result['msg'] += format_keyword_confirm_message(user)
+        result['ok'] = True
+
+def is_emoji_or_sticker(mtype):
+    return mtype == 'emoji' or mtype == 'sticker'
 
 def subscribe_keyword(user):
     keys = []
