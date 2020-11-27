@@ -109,10 +109,12 @@ def subscribe_keyword(user):
     keys = []
     try:
         for key in KEYWORD_TMP[user.pk]:
-            key_object = Keyword(keyword=key)
-            keys.append(key_object)
             if not Keyword.objects.filter(keyword=key).exists():
+                key_object = Keyword(keyword=key)
+                keys.append(key_object)
                 key_object.save()
+            else:
+                keys.append(Keyword.objects.get(keyword=key))
         user.keyword_set.add(*keys)
     except:
         etype, value, tb = sys.exc_info()
