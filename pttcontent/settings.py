@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 from dotenv import load_dotenv
 load_dotenv()
@@ -124,3 +125,44 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# LOGGING_CONFIG = None
+# import logging.config
+# logging.config.fileConfig('logging.ini')
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'level': 'DEBUG',
+            'formatter': 'simple',
+            'filename': os.getenv('LOG_PATH', 'logs')+'/logging.log',
+            'when': 'd',
+            'interval': 1,
+            'backupCount': 7,
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
+            'formatter': 'simple',
+            'stream': sys.stdout,
+        },
+    },
+    'formatters': {
+        'simple': {
+            'format': '%(asctime)s %(name)s - %(levelname)s:%(message)s'
+        }
+    },
+    'root': {
+        'handlers': ['console', 'file'],
+        'level': os.getenv('LOG_LEVEL', 'INFO'),
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False
+        }
+    }
+}
