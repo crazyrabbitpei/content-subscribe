@@ -62,7 +62,7 @@ def action_confirming(user, result, mtype, message=None, state='2'):
             result['msg'] = f'已移除關鍵字: {",".join(remove_keys)}\n'
             result['msg'] += Message.format_keyword_confirm_message(user)
         else:
-            result['msg'] = '沒有任何關鍵字被移除'
+            result['msg'] = '沒有任何關鍵字被移除\n'
             result['msg'] += Message.format_keyword_confirm_message(user)
 
         result['ok'] = True
