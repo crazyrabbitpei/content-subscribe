@@ -28,8 +28,11 @@ def format_searh_message(keyword, result):
         meta = board.center(25, '=')
         message += meta+'\n'
         for info in infos:
-            message += f"[{index}] {info['_source']['category']} {info['_source']['title']}\n"
-            message += f"發文時間: {info['_source']['time']}\n"
+            category = info['_source'].get('category', '')
+            title = info['_source'].get('title', '')
+            time = info['_source'].get('time', '')
+            message += f"[{index}]{category} {title}\n"
+            message += f"發文時間: {time}\n"
             message += f"{info['_source']['url']}\n"
             index += 1
     message += f'--\n'
