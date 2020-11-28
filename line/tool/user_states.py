@@ -23,7 +23,10 @@ def action_free(user, result, mtype, message=None, state='0'):
 def action_subscribing(user, result, mtype, message=None, state='1'):
     if Line.is_emoji_or_sticker(mtype):
         state = '2'
-        result['msg'] = Message.format_keyword_confirm_message(user)
+        if len(Kw.KEYWORD_TMP[user.user_id]) > 0:
+            result['msg'] = Message.format_keyword_confirm_message(user)
+        else:
+            result['msg'] = '已結束關鍵字輸入，若要重新開始訂閱請輸入一個emoji'
         result['ok'] = True
     elif mtype == 'text':
         Kw.KEYWORD_TMP[user.user_id].append(message)
