@@ -17,7 +17,7 @@ def subscribe_keyword(user):
                 key_object = Keyword(keyword=key)
                 keys.append(key_object)
                 key_object.save()
-            elif not user.keyword_set.filter(pk=key.pk).exists():
+            elif not user.keyword_set.filter(keyword=key).exists():
                 keys.append(Keyword.objects.get(keyword=key))
                 success_keys.append(key)
             else:

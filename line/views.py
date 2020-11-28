@@ -105,7 +105,7 @@ def echo(event):
     try:
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=message))
+            TextSendMessage(text=_(f'{message}')))
     except LineBotApiError as e:
         etype, value, tb = sys.exc_info()
         logger.error(f'Reply api error {etype}', exc_info=True)
