@@ -59,7 +59,7 @@ def add_subscribe(user, *, keywords):
     except:
         raise
 
-def get_subscribed_keyword(user):
+def get_subscribed_keywords(user):
     pass
 
 def remove_tmp_subscribing(user, message=None):
@@ -72,15 +72,12 @@ def remove_tmp_subscribing(user, message=None):
 
     numbers = [int(n) if int(n) > 0 and int(n) <= keys_num else -
                1 for n in message.split(' ') if n.isnumeric()]
-    if len(numbers) == keys_num:
-        remove_all = True
-
-    if remove_all:
-        remove_keys = KEYWORD_TMP[user.user_id][:]
-        KEYWORD_TMP[user.user_id].clear()
-        return remove_all, remove_keys
 
     for n in sorted(numbers, reverse=True):
+        if n <= 0: continue
         remove_keys.append(KEYWORD_TMP[user.user_id].pop(n-1))
+
+    if len(remove_keys) == keys_num:
+        remove_all = True
 
     return remove_all, remove_keys
