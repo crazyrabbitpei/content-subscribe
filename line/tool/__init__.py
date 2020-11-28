@@ -73,35 +73,6 @@ def get_user_info_from_rds(user_id):
 def get_user_info_from_cache(user_id):
     return None
 
-def action(user, /, *, mtype, message=None):
-    logger.info(
-        f'User action, current state: {user.state}, mtype: {mtype}, message: {message}')
-    result = {
-        'ok': False,
-        'msg': None,
-        'err_msg': None,
-    }
-
-    handler = COMMAND_STATES.get(user.state, None)
-    if handler:
-        new_state = handler(user, result, mtype, message)
-    else:
-        logger.error(f'尚未定義的user state: {user.state}')
-        result['err_msg'] = _(f'服務好像出了點問題QQ')
-        return result
-
-    if new_state not in COMMAND_STATES:
-        logger.error(f'新的state尚未定義，故無法更新user state: {new_state}')
-        result['err_msg'] = _(f'服務好像出了點問題QQ')
-        return result
-
-    try:
-        update_user_state(user, new_state)
-    except:
-        logger.error('無法更新', exc_info=True)
-
-    return result
-
 def action_free(user, result, mtype, message=None, state='0'):
     if is_emoji_or_sticker(mtype):
         state = '1'
@@ -113,6 +84,7 @@ def action_free(user, result, mtype, message=None, state='0'):
         result['ok'] = True
 
     return state
+
 
 def action_subscribing(user, result, mtype, message=None, state='1'):
     if is_emoji_or_sticker(mtype):
@@ -154,6 +126,37 @@ def action_confirming(user, result, mtype, message=None, state='2'):
         result['ok'] = True
 
     return state
+
+def action(user, /, *, mtype, message=None):
+    logger.info(
+        f'User action, current state: {user.state}, mtype: {mtype}, message: {message}')
+    result = {
+        'ok': False,
+        'msg': None,
+        'err_msg': None,
+    }
+
+    handler = COMMAND_STATES.get(user.state, None)
+    if handler:
+        new_state = handler(user, result, mtype, message)
+    else:
+        logger.error(f'尚未定義的user state: {user.state}')
+        result['err_msg'] = _(f'服務好像出了點問題QQ')
+        return result
+
+    if new_state not in COMMAND_STATES:
+        logger.error(f'新的state尚未定義，故無法更新user state: {new_state}')
+        result['err_msg'] = _(f'服務好像出了點問題QQ')
+        return result
+
+    try:
+        update_user_state(user, new_state)
+    except:
+        logger.error('無法更新', exc_info=True)
+
+    return result
+
+
 
 def remove_tmp_subscribing(user, message=None):
     if not message:
