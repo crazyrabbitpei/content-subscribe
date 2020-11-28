@@ -9,30 +9,58 @@ KEYWORD_TMP = defaultdict(list)
 def subscribe_keyword(user):
     exist_keys = []
     success_keys = []
-    keys = []
+    wait_to_be_subscribed = []
     err_msg = None
     try:
         for key in KEYWORD_TMP[user.user_id]:
-            if not Keyword.objects.filter(keyword=key).exists():
-                key_object = Keyword(keyword=key)
-                keys.append(key_object)
-                key_object.save()
+            if not keyword_exists(key):
+                key_object = add_keyword(key)
+            else:
+                key_object = Keyword.objects.get(keyword=key)
 
-                success_keys.append(key)
-            elif not user.keyword_set.filter(keyword=key).exists():
-                keys.append(Keyword.objects.get(keyword=key))
+            if not is_subscribed(user, key):
+                wait_to_be_subscribed.append(key_object)
                 success_keys.append(key)
             else:
                 exist_keys.append(key)
-        user.keyword_set.add(*keys)
+
+        add_subscribe(user, keywords=wait_to_be_subscribed)
     except:
         etype, value, tb = sys.exc_info()
-        logger.error(f'關鍵字加入失敗 {etype}', exc_info=True)
+        logger.error(f'關鍵字加入失敗: {key}', exc_info=True)
         err_msg = _(f'關鍵字加入失敗，請重新操作')
         return False, success_keys, exist_keys, err_msg
 
     return True, success_keys, exist_keys, err_msg
 
+
+def keyword_exists(keyword):
+    return Keyword.objects.filter(keyword=keyword).exists()
+
+def is_subscribed(user, keyword):
+    return user.keyword_set.filter(keyword=keyword).exists()
+
+def add_keyword(keyword):
+    key_object = None
+    try:
+        key_object = Keyword(keyword=keyword)
+        key_object.save()
+    except:
+        raise
+
+    return key_object
+
+def add_subscribe(user, *, keywords):
+    if len(keywords) == 0:
+        return
+
+    try:
+        user.keyword_set.add(*keywords)
+    except:
+        raise
+
+def get_subscribed_keyword(user):
+    pass
 
 def remove_tmp_subscribing(user, message=None):
     if not message:
