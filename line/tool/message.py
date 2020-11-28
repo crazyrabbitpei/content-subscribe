@@ -25,7 +25,7 @@ def format_searh_message(keyword, result):
     message = f'共有 {len(hits)} 筆 {keyword} 結果, {board_info}\n'
     for board, infos in count_board.items():
         index = 1
-        meta = board.center(25, '=')
+        meta = f'==={board}'
         message += meta+'\n'
         for info in infos:
             category = info['_source'].get('category', '')
