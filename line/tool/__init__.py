@@ -1,3 +1,7 @@
+from elasticsearch import Elasticsearch
+
+from django.utils.translation import gettext_lazy as _
+
 import sys, os
 import logging
 from collections import defaultdict
@@ -6,7 +10,6 @@ load_dotenv()
 
 from line.models import Keyword, User
 
-from elasticsearch import Elasticsearch
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +40,12 @@ es_search_filters = [
     {"range": {"time": {"gte": "now-15d"}}}
 ]
 
+COMMAND_STATES = {
+    '0': action_free,
+    '1': action_subscribing,
+    '2': action_confirming,
+}
+
 KEYWORD_TMP = defaultdict(list)
 
 def detect_message_type(event):
@@ -54,30 +63,48 @@ def detect_message_type(event):
 
     return (None, None)
 
+def get_user_info(user_id):
+    return get_user_info_from_cache(user_id) or get_user_info_from_rds(user_id)
+
+def get_user_info_from_rds(user_id):
+    return User.objects.get(pk=user_id)
+
+#TODO
+def get_user_info_from_cache(user_id):
+    return None
+
 def action(user, /, *, mtype, message=None):
-    logger.info(f'User action, current status: {user.status}, mtype: {mtype}, message: {message}')
+    logger.info(
+        f'User action, current state: {user.state}, mtype: {mtype}, message: {message}')
     result = {
         'ok': False,
         'msg': None,
         'err_msg': None,
     }
 
-    if user.status == '0':
-        action_0(user, result, mtype, message)
-    elif user.status == '1':
-        action_1(user, result, mtype, message)
-    elif user.status == '2':
-        action_2(user, result, mtype, message)
+    handler = COMMAND_STATES.get(user.state, None)
+    if handler:
+        new_state = handler(user, result, mtype, message)
+    else:
+        logger.error(f'尚未定義的user state: {user.state}')
+        result['err_msg'] = _(f'服務好像出了點問題QQ')
+        return result
+
+    if new_state not in COMMAND_STATES:
+        logger.error(f'新的state尚未定義，故無法更新user state: {new_state}')
+        result['err_msg'] = _(f'服務好像出了點問題QQ')
+        return result
+
     try:
-        user.save()
+        update_user_state(user, new_state)
     except:
-        logger.error('無法將關鍵字儲存到db', exc_info=True)
+        logger.error('無法更新', exc_info=True)
 
     return result
 
-def action_0(user, result, mtype, message=None):
+def action_free(user, result, mtype, message=None, state='0'):
     if is_emoji_or_sticker(mtype):
-        user.status = '1'
+        state = '1'
         result['msg'] = '可以開始輸入關鍵字囉'
         result['ok'] = True
     elif mtype == 'text':
@@ -85,67 +112,112 @@ def action_0(user, result, mtype, message=None):
         result['msg'] = find(message, es_search_patterns, es_search_patterns)
         result['ok'] = True
 
-def action_1(user, result, mtype, message=None):
+    return state
+
+def action_subscribing(user, result, mtype, message=None, state='1'):
     if is_emoji_or_sticker(mtype):
-        user.status = '2'
+        state = '2'
         result['msg'] = format_keyword_confirm_message(user)
         result['ok'] = True
     elif mtype == 'text':
-        KEYWORD_TMP[user.pk].append(message)
+        KEYWORD_TMP[user.user_id].append(message)
         result['msg'] = '繼續輸入下一筆，或是用一個emoji來結束關鍵字輸入'
         result['ok'] = True
 
-def action_2(user, result, mtype, message=None):
+    return state
+
+def action_confirming(user, result, mtype, message=None, state='2'):
     if is_emoji_or_sticker(mtype):
-        user.status = '0'
-        if not subscribe_keyword(user):
-            result['err_msg'] = f'關鍵字加入失敗，請重新操作'
-        else:
-            result['msg'] = f'成功訂閱關鍵字: {",".join(KEYWORD_TMP[user.pk])}'
-            result['ok'] = True
-        KEYWORD_TMP[user.pk].clear()
+        state = '0'
+        ok, success_keys, exist_keys, err_msg = subscribe_keyword(user)
+        result['ok'] = ok
+        if not ok:
+            result['err_msg'] = err_msg
+        elif len(success_keys) > 0:
+            result['msg'] = f'成功訂閱關鍵字: {",".join(success_keys)}'
+
+        if len(exist_keys) > 0:
+            result['msg'] += f'已訂閱過的關鍵字: {",".join(exist_keys)}'
+
+        KEYWORD_TMP[user.user_id].clear()
     elif mtype == 'text':
-        if message.strip() == '0':
-            user.status = '0'
+        remove_all, remove_keys = remove_tmp_subscribing(user, message)
+        if remove_all:
+            state = '0'
             result['msg'] = '此次輸入的關鍵字已都移除，若要重新開始訂閱請輸入一個emoji'
-            KEYWORD_TMP[user.pk].clear()
-        else:
-            numbers = [int(n) if int(n) > 0 and int(n) <= len(
-                KEYWORD_TMP[user.pk]) else -1 for n in message.split(' ') if n.isnumeric()]
-            remove_keys = []
-            for n in sorted(numbers, reverse=True):
-                remove_keys.append(KEYWORD_TMP[user.pk].pop(n-1))
+        elif len(remove_keys) > 0:
             result['msg'] = f'已移除關鍵字: {",".join(remove_keys)}\n'
             result['msg'] += format_keyword_confirm_message(user)
+        else:
+            result['msg'] = '沒有任何關鍵字被移除'
+
         result['ok'] = True
+
+    return state
+
+def remove_tmp_subscribing(user, message=None):
+    if not message:
+        return []
+
+    remove_all = False
+    remove_keys = []
+    keys_num = len(KEYWORD_TMP[user.user_id])
+
+    numbers = [int(n) if int(n) > 0 and int(n) <= keys_num else -1 for n in message.split(' ') if n.isnumeric()]
+    if len(numbers) == keys_num:
+        remove_all = True
+
+    if remove_all:
+        remove_keys = KEYWORD_TMP[user.user_id][:]
+        KEYWORD_TMP[user.user_id].clear()
+        return remove_all, remove_keys
+
+    for n in sorted(numbers, reverse=True):
+        remove_keys.append(KEYWORD_TMP[user.user_id].pop(n-1))
+
+    return remove_all, remove_keys
+
+def update_user_state(user, new_state):
+    user.state = new_state
+    try:
+        user.save()
+    except:
+        raise
 
 def is_emoji_or_sticker(mtype):
     return mtype == 'emoji' or mtype == 'sticker'
 
 def subscribe_keyword(user):
+    exist_keys = []
+    success_keys = []
     keys = []
+    err_msg = None
     try:
-        for key in KEYWORD_TMP[user.pk]:
+        for key in KEYWORD_TMP[user.user_id]:
             if not Keyword.objects.filter(keyword=key).exists():
                 key_object = Keyword(keyword=key)
                 keys.append(key_object)
                 key_object.save()
-            else:
+            elif not user.keyword_set.filter(pk=key.pk).exists():
                 keys.append(Keyword.objects.get(keyword=key))
+                success_keys.append(key)
+            else:
+                exist_keys.append(key)
         user.keyword_set.add(*keys)
     except:
         etype, value, tb = sys.exc_info()
         logger.error(f'關鍵字加入失敗 {etype}', exc_info=True)
-    else:
-        return True
-    return False
+        err_msg = _(f'關鍵字加入失敗，請重新操作')
+        return False, success_keys, exist_keys, err_msg
+
+    return True, success_keys, exist_keys, err_msg
 
 def format_keyword_confirm_message(user):
     msg = '請確認以下關鍵字是否正確:\n'
-    msg += '\n'.join([f'[{index+1}] {key}' for index, key in enumerate(KEYWORD_TMP[user.pk])])
+    msg += '\n'.join([f'[{index+1}] {key}' for index, key in enumerate(KEYWORD_TMP[user.user_id])])
     msg += '\n--'
     msg += '\n確認: 輸入emoji符號'
-    msg += '\n刪除: 輸入關鍵字編號，若要刪除多筆則用空格區隔，若要刪除所有關鍵字請輸入0'
+    msg += '\n刪除: 輸入關鍵字編號，若要刪除多筆則用空格區隔'
     return msg
 
 def format_searh_message(keyword, result):
