@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from line.models import User, Keyword
-from line.tool import detect_message_type, action
+from line.tool import get_user_info, detect_message_type, action
 
 from django.utils.translation import gettext_lazy as _
 from django.shortcuts import render
@@ -86,7 +86,7 @@ def unfollow(event):
 def echo(event):
     message = None
     try:
-        user = User.objects.get(pk=event.source.user_id)
+        user = get_user_info(event.source.user_id)
     except:
         logging.error(f'使用者 {event.source.user_id} 查找失敗', exc_info=True)
         message = _(f'好像出了問題，請試著先封鎖帳號再解封鎖試試')
@@ -101,23 +101,6 @@ def echo(event):
             message = result['msg']
         else:
             message = result['err_msg']
-    # TODO: 傳送confirm button確認訂閱資訊
-    # TODO: 傳送Carousel template顯示搜尋結果
-    # TemplateSendMessage(
-    #     template=ConfirmTemplate(
-    #        text=_(f'{message}'),
-    #        actions=[
-    #            MessageAction(
-    #                label=_('是'),
-    #                text='😀'
-    #            ),
-    #            MessageAction(
-    #                label=_(''),
-    #                text=''
-    #            ),
-    #        ]
-    #     )
-    # )
     try:
         line_bot_api.reply_message(
             event.reply_token,
