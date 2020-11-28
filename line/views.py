@@ -1,3 +1,7 @@
+from line.tool import get_user_info, action
+from line.tool.line import detect_message_type
+from line.models import User, Keyword
+
 import logging
 import json
 import time
@@ -7,9 +11,6 @@ import sys
 from collections import defaultdict
 from dotenv import load_dotenv
 load_dotenv()
-
-from line.models import User, Keyword
-from line.tool import get_user_info, detect_message_type, action
 
 from django.utils.translation import gettext_lazy as _
 from django.shortcuts import render
