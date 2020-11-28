@@ -38,14 +38,16 @@ def action_confirming(user, result, mtype, message=None, state='2'):
         state = '0'
         ok, success_keys, exist_keys, err_msg = Kw.subscribe_keyword(user)
         result['ok'] = ok
+        msg = ''
         if not ok:
             result['err_msg'] = err_msg
         elif len(success_keys) > 0:
-            result['msg'] = f'成功訂閱關鍵字: {",".join(success_keys)}'
+            msg = f'成功訂閱關鍵字: {",".join(success_keys)}'
 
         if len(exist_keys) > 0:
-            result['msg'] += f'已訂閱過的關鍵字: {",".join(exist_keys)}'
+            msg += f'已訂閱過的關鍵字: {",".join(exist_keys)}'
 
+        result['msg'] = msg
         Kw.KEYWORD_TMP[user.user_id].clear()
     elif mtype == 'text':
         remove_all, remove_keys = Kw.remove_tmp_subscribing(user, message)
