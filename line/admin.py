@@ -7,7 +7,7 @@ class KeywordInline(admin.TabularInline):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('user_id', 'follow_date', 'status')
+    list_display = ('user_id', 'follow_date', 'state')
     inlines = [KeywordInline]
 
 @admin.register(Keyword)

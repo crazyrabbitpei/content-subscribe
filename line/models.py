@@ -6,13 +6,13 @@ class User(models.Model):
     user_id = models.CharField(_('User id'), primary_key=True, max_length=50, help_text=_("User id"))
     follow_date = models.DateTimeField(_('Follow date'), auto_now_add=True, help_text=_("Follow date"))
 
-    COMMAND_STATUS = (
+    COMMAND_STATES = (
         ('0', _('Free')),  # 還沒進入任何命令狀態
         ('1', _('Subscribing')),  # 正在輸入關鍵字
         ('2', _('Confirming')),  # 正在確認關鍵字
     )
-    status = models.CharField(
-        _('status'), max_length=2, choices=COMMAND_STATUS, default='0', help_text=_('Typing status'))
+    state = models.CharField(
+        _('state'), max_length=2, choices=COMMAND_STATES, default='0', help_text=_('Typing state'))
     class Meta():
         ordering = ['follow_date']
 
