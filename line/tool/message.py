@@ -29,6 +29,9 @@ def format_searh_message(keyword, result):
         message += meta+'\n'
         for info in infos:
             category = info['_source'].get('category', '')
+            if category == None or category == 'None':
+                category = ''
+
             title = info['_source'].get('title', '')
             time = info['_source'].get('time', '')
             message += f"[{index}]{category} {title}\n"
