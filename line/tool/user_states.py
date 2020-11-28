@@ -45,7 +45,7 @@ def action_confirming(user, result, mtype, message=None, state='2'):
             msg = f'成功訂閱關鍵字: {",".join(success_keys)}'
 
         if len(exist_keys) > 0:
-            msg += f'已訂閱過的關鍵字: {",".join(exist_keys)}'
+            msg += f'\n已訂閱過的關鍵字: {",".join(exist_keys)}'
 
         result['msg'] = msg
         Kw.KEYWORD_TMP[user.user_id].clear()
