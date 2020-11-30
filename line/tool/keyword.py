@@ -7,31 +7,29 @@ from collections import defaultdict
 logger = logging.getLogger(__name__)
 
 
+def get_tmp(user_id):
+    return Cache.get_tmp_keywords(user_id)
+
 def add_tmp(user_id, keyword):
     return Cache.add_tmp_keyword(user_id, keyword)
 
-def delete_tmp(user_id, tmp_keys=None, delete_keys=None, *, delete_all=False):
-    if not delete_keys:
+def delete_tmp(user_id, keys=None):
+    if not keys:
         return []
 
-    deleted_keys = [key for key in delete_keys]
-    if delete_all:
-        deleted_keys = tmp_keys
-
+    deleted_keys = [key for key in keys]
     Cache.delete_tmp_keywords(user_id, deleted_keys)
 
     return deleted_keys
-
-def get_tmp(user_id):
-    return Cache.get_tmp_keywords(user_id)
 
 def subscribe(user_id):
     exist_keys = []
     success_keys = []
     wait_to_be_subscribed = []
     err_msg = None
+    tmp_keys = get_tmp(user_id)
     try:
-        wait_to_be_subscribed, has_been_subscribed = update_keywords(user_id, get_tmp(user_id))
+        wait_to_be_subscribed, has_been_subscribed = update_keywords(user_id, tmp_keys)
         success_keys = connect_keywords_to_user(user_id, wait_to_be_subscribed)
         exist_keys = [key for key in has_been_subscribed]
     except:
@@ -40,7 +38,7 @@ def subscribe(user_id):
         err_msg = _(f'關鍵字加入失敗，請重新操作')
         return False, success_keys, exist_keys, err_msg
 
-    delete_tmp(user_id, delete_all=True)
+    delete_tmp(user_id, tmp_keys)
     return True, success_keys, exist_keys, err_msg
 
 
