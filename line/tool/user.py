@@ -27,7 +27,7 @@ def delete(user_id):
 
     def cache(user_id):
         logger.info(f'Delete user {user_id} from cache')
-        Cache.update_user(user_id)
+        Cache.delete_user(user_id)
 
     try:
         cache(user_id)
@@ -44,7 +44,7 @@ def update_state(user_id, new_state):
     #     user.save()
 
     def cache(user_id, new_state):
-        logger.info(f'Update user {user_id} info from cache')
+        logger.info(f'Update {user_id} info to cache')
         Cache.update_state(user_id, new_state)
 
     try:
@@ -55,7 +55,7 @@ def update_state(user_id, new_state):
 
 def info(user_id):
     def rds(user_id):
-        logger.info(f'Get user {user_id} info from rds')
+        logger.info(f'Get {user_id} info from rds')
         user = User.objects.get(pk=user_id)
         return {
             'user_id': user.user_id,
@@ -63,11 +63,11 @@ def info(user_id):
         }
 
     def cache(user_id):
-        logger.info(f'Get user {user_id} info from cache')
+        logger.info(f'Get {user_id} info from cache')
         return Cache.get_user_info(user_id)
 
     def update_cache(user_id, user_info):
-        logger.info(f'Update user {user_id} info to cache')
+        logger.info(f'Update {user_id} info to cache')
         Cache.update_user_info(user_id, user_info)
 
     try:

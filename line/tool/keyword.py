@@ -45,6 +45,8 @@ def subscribe(user_id):
 
 def update_keywords(user_id, keywords, to_rds=True, to_cache=True):
     def rds(user_id, keywords):
+        logger.info(f'{user_id} update keywords to rds')
+
         user = User.objects.get(pk=user_id)
 
         key_objects = []
@@ -63,6 +65,8 @@ def update_keywords(user_id, keywords, to_rds=True, to_cache=True):
         return wait_to_be_subscribed, has_been_subscribed
 
     def cache(user_id, keywords):
+        logger.info(f'{user_id} update keywords to cache')
+
         for keyword in keywords:
             if not exists(keyword)[1]:
                 Cache.add_global_keyword(keyword, user_id)
@@ -80,6 +84,7 @@ def update_keywords(user_id, keywords, to_rds=True, to_cache=True):
 
 def connect_keywords_to_user(user_id, wait_to_be_subscribed, to_rds=True, to_cache=True):
     def rds(user_id, wait_to_be_subscribed):
+        logger.info(f'{user_id} connect keywords to rds')
 
         if len(wait_to_be_subscribed) == 0:
             return
@@ -87,6 +92,7 @@ def connect_keywords_to_user(user_id, wait_to_be_subscribed, to_rds=True, to_cac
         user.keyword_set.add(*wait_to_be_subscribed)
 
     def cache(user_id, keys):
+        logger.info(f'{user_id} connect keywords to cache')
         Cache.update_user_keywords(user_id, keys)
 
     keys = [key.keyword for key in wait_to_be_subscribed]
