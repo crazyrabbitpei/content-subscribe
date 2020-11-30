@@ -21,7 +21,9 @@ psycopg2==2.8.6
 pycodestyle==2.6.0
 pylint==2.6.0
 python-dotenv==0.15.0
+python-statemachine==0.8.0
 pytz==2020.4
+redis==3.5.3
 requests==2.24.0
 six==1.15.0
 sqlparse==0.4.1
