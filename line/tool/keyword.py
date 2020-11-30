@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def add_tmp(user_id, keyword):
     return Cache.add_tmp_keyword(user_id, keyword)
 
-def delete_tmp(user_id, tmp_keys, delete_keys, delete_all=False):
+def delete_tmp(user_id, tmp_keys=None, delete_keys=None, *, delete_all=False):
     if not delete_keys:
         return []
 
@@ -40,6 +40,7 @@ def subscribe(user_id):
         err_msg = _(f'關鍵字加入失敗，請重新操作')
         return False, success_keys, exist_keys, err_msg
 
+    delete_tmp(user_id, delete_all=True)
     return True, success_keys, exist_keys, err_msg
 
 
