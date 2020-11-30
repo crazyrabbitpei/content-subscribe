@@ -34,11 +34,11 @@ def get_tmp_keywords(user_id):
 
 def add_global_keyword(keyword, last_user_id):
     r = redis.StrictRedis(connection_pool=pool)
-    return r.set('keyword:{keyword}', last_user_id, ex=60*60*24*5, keepttl=True)
+    return r.set(f'keyword:{keyword}', last_user_id, ex=60*60*24*5, keepttl=True)
 
 def get_global_keyword(keyword):
     r = redis.StrictRedis(connection_pool=pool)
-    return r.get('keyword:{keyword}')
+    return r.get(f'keyword:{keyword}')
 
 def update_user_keywords(user_id, keywords):
     r = redis.StrictRedis(connection_pool=pool)
