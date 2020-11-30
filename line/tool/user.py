@@ -38,13 +38,12 @@ def delete(user_id):
 
 def update_state(user_id, new_state):
     # def rds(user, new_state):
-    #     logger.info(f'Update user {user["user_id"]} info from rds')
     #     user = User.objects.get(pk=user["user_id"])
     #     user.state = new_state
     #     user.save()
 
     def cache(user_id, new_state):
-        logger.info(f'Update {user_id} info to cache')
+        logger.info(f'Update {user_id} state to cache')
         Cache.update_state(user_id, new_state)
 
     try:
