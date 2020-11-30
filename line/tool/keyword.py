@@ -32,7 +32,7 @@ def subscribe(user_id):
     err_msg = None
     try:
         wait_to_be_subscribed, has_been_subscribed = update_keywords(user_id, get_tmp(user_id))
-        success_keys = connect_keywords_to_user(user, wait_to_be_subscribed)
+        success_keys = connect_keywords_to_user(user_id, wait_to_be_subscribed)
         exist_keys = [key.keyword for key in has_been_subscribed]
     except:
         etype, value, tb = sys.exc_info()
@@ -71,6 +71,9 @@ def update_keywords(user_id, keywords, to_rds=True, to_cache=True):
             if not exists(keyword)[1]:
                 Cache.add_global_keyword(keyword, user_id)
 
+    if len(keywords) == 0:
+        return [], []
+
     try:
         if to_rds:
             wait_to_be_subscribed, has_been_subscribed = rds(user_id, keywords)
@@ -86,14 +89,15 @@ def connect_keywords_to_user(user_id, wait_to_be_subscribed, to_rds=True, to_cac
     def rds(user_id, wait_to_be_subscribed):
         logger.info(f'{user_id} connect keywords to rds')
 
-        if len(wait_to_be_subscribed) == 0:
-            return
         user = User.objects.get(pk=user_id)
         user.keyword_set.add(*wait_to_be_subscribed)
 
     def cache(user_id, keys):
         logger.info(f'{user_id} connect keywords to cache')
         Cache.update_user_keywords(user_id, keys)
+
+    if len(wait_to_be_subscribed) == 0:
+        return []
 
     keys = [key.keyword for key in wait_to_be_subscribed]
     try:
