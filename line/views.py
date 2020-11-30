@@ -79,7 +79,7 @@ def unfollow(event):
     try:
         LineUser.delete(event.source.user_id)
     except:
-        logger.error(f'無法刪除使用者 {event.source.user_id}')
+        logger.error(f'無法刪除使用者 {event.source.user_id}', exc_info=True)
     else:
         logger.info(f'{event.source.user_id} 成功unfollow')
 
@@ -117,7 +117,7 @@ def push_notice(request):
         line_bot_api.push_message(
             'U2b3104fdaef9c190510326b414c1611d', TextSendMessage(text=f'{message}'))
     except:
-        logger.error('主動通知失敗')
+        logger.error('主動通知失敗', exc_info=True)
 
     return JsonResponse({"message": "ok"})
 
