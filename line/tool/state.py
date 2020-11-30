@@ -64,7 +64,7 @@ def action_confirming(user_id, result, mtype, message=None, state='2'):
         deleted_keys = Kw.delete_tmp(user_id, delete_keys)
         if len(deleted_keys) == len(tmp_keys):
             state = '0'
-            result['msg'] = '此次輸入的關鍵字已都移除，若要重新開始訂閱請輸入一個emoji'
+            result['msg'] = '此次輸入的關鍵字已都移除，若要重新開始訂閱請輸入一個emoji\n'
             result['msg'] += Message.format_subscribed_keywords(user_id)
 
         elif len(deleted_keys) > 0:

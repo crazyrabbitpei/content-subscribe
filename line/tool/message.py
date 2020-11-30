@@ -20,7 +20,7 @@ def format_subscribed_keywords(user_id):
     msg = f'==以下是您目前的訂閱清單==\n'
     subscribed_keywords = Kw.get_subscribed(user_id)
     if len(subscribed_keywords) > 0:
-        msg += '\n'.join([f'{index}) {key}' for index, key in enumerate(subscribed_keywords)])
+        msg += '\n'.join([f'{index+1}) {key}' for index, key in enumerate(subscribed_keywords)])
     else:
         msg += '\n還沒有任何訂閱喔!'
 
