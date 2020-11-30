@@ -90,6 +90,8 @@ def connect_keywords_to_user(user_id, wait_to_be_subscribed, to_rds=True, to_cac
         logger.info(f'{user_id} connect keywords to rds')
 
         user = User.objects.get(pk=user_id)
+        keys = ','.join([key.keyword for key in user.keyword_set.all()])
+        logger.info(f'{user.user_id} new keywords: {keys}')
         user.keyword_set.add(*wait_to_be_subscribed)
 
     def cache(user_id, keys):
