@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 def action_free(user_id, result, mtype, message=None, state='0'):
     if Line.is_emoji_or_sticker(mtype):
         state = '1'
-        result['msg'] = '可以開始輸入關鍵字囉'
+        result['msg'] = '可以開始輸入關鍵字囉\n'
+        result['msg'] += Message.format_subscribed_keywords(user_id)
         result['ok'] = True
     elif mtype == 'text':
         msg = Source.find(message)
@@ -30,6 +31,8 @@ def action_subscribing(user_id, result, mtype, message=None, state='1'):
         else:
             state = '0'
             result['msg'] = '已結束關鍵字輸入，若要重新開始訂閱請輸入一個emoji'
+            result['msg'] += Message.format_subscribed_keywords(user_id)
+
         result['ok'] = True
     elif mtype == 'text':
         Kw.add_tmp(user_id, message)
@@ -52,8 +55,7 @@ def action_confirming(user_id, result, mtype, message=None, state='2'):
         else:
             msg = '沒有任何新的關鍵字被訂閱喔!\n'
 
-        if len(exist_keys) > 0:
-            msg += f'已訂閱過的關鍵字: {",".join(exist_keys)}'
+        msg += Message.format_subscribed_keywords(user_id)
 
         result['msg'] = msg
     elif mtype == 'text':
@@ -63,6 +65,8 @@ def action_confirming(user_id, result, mtype, message=None, state='2'):
         if len(deleted_keys) == len(tmp_keys):
             state = '0'
             result['msg'] = '此次輸入的關鍵字已都移除，若要重新開始訂閱請輸入一個emoji'
+            result['msg'] += Message.format_subscribed_keywords(user_id)
+
         elif len(deleted_keys) > 0:
             result['msg'] = f'已移除關鍵字: {",".join(deleted_keys)}\n'
             result['msg'] += Message.format_keyword_confirm_message(user_id)
