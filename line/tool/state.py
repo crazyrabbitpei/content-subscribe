@@ -76,5 +76,5 @@ def action_confirming(user_id, result, mtype, message=None, state='2'):
 
 
 def get_delete_keys(tmp_keys, message):
-    return [tmp_keys[int(n)-1] if int(n) > 0 and int(n) <= len(tmp_keys) else -1 for n in message.split(' ') if n.isnumeric()]
+    return [tmp_keys[int(n)-1] for n in message.split(' ') if n.isnumeric() and int(n) > 0 and int(n) <= len(tmp_keys)]
 
