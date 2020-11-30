@@ -1,4 +1,5 @@
 from line.tool import get_user_info, action
+import line.tool.user as LineUser
 from line.tool.line import detect_message_type
 from line.models import User, Keyword
 
@@ -59,24 +60,24 @@ def callback(request):
 
 @handler.add(FollowEvent)
 def follow(event):
+    message = _('開始輸入任何你想查找的ptt內容吧！\n或是輸入任一個emoji符號來開始訂閱關鍵字~')
     try:
-        User.objects.create(pk=event.source.user_id)
+        LineUser.create(event.source.user_id)
     except:
         etype, value, tb = sys.exc_info()
         logger.error(f'使用者加入失敗 {etype}', exc_info=True)
         message = _('註冊失敗QQ，請先封鎖後再解封所試試')
 
-        try:
-            line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                text=f'{message}'))
-        except:
-            logger.error('Reply error', exc_info=True)
+    try:
+        line_bot_api.reply_message(event.reply_token, TextSendMessage(
+            text=f'{message}'))
+    except:
+        logger.error('Reply error', exc_info=True)
 
 @handler.add(UnfollowEvent)
 def unfollow(event):
     try:
-        user = User.objects.get(pk=event.source.user_id)
-        user.delete()
+        LineUser.delete(event.source.user_id)
     except:
         logger.error(f'無法刪除使用者 {event.source.user_id}')
     else:

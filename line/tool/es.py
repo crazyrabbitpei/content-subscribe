@@ -1,5 +1,3 @@
-import line.tool.message as Message
-
 import os
 from elasticsearch import Elasticsearch
 import logging
@@ -33,7 +31,8 @@ es_search_filters = [
 ]
 
 
-def find(keyword=None, patterns=None, filters=None):
+def find(*, source, keyword=None, patterns=None, filters=None):
+    result = None
     search = {
         "query": {
             "bool": {
@@ -45,6 +44,7 @@ def find(keyword=None, patterns=None, filters=None):
     try:
         result = client.search(body=search)
     except:
-        logger.error('搜尋db失敗', exc_info=True)
+        logger.error('搜尋es失敗', exc_info=True)
+        raise
 
-    return Message.format_searh_message(keyword, result)
+    return result

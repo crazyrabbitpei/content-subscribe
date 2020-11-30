@@ -1,83 +1,115 @@
+import line.tool.cache as Cache
+
 from line.models import Keyword, User
 from django.utils.translation import gettext_lazy as _
 import logging, sys
 from collections import defaultdict
 logger = logging.getLogger(__name__)
 
-KEYWORD_TMP = defaultdict(list)
 
-def subscribe_keyword(user):
+def add_tmp(user_id, keyword):
+    return Cache.add_tmp_keyword(user_id, keyword)
+
+def delete_tmp(user_id, tmp_keys, delete_keys, delete_all=False):
+    if not delete_keys:
+        return []
+
+    deleted_keys = [key for key in delete_keys]
+    if delete_all:
+        deleted_keys = tmp_keys
+
+    Cache.delete_tmp_keywords(user_id, deleted_keys)
+
+    return deleted_keys
+
+def get_tmp(user_id):
+    return Cache.get_tmp_keywords(user_id)
+
+def subscribe(user_id):
     exist_keys = []
     success_keys = []
     wait_to_be_subscribed = []
     err_msg = None
     try:
-        for key in KEYWORD_TMP[user.user_id]:
-            if not keyword_exists(key):
-                key_object = add_keyword(key)
-            else:
-                key_object = Keyword.objects.get(keyword=key)
-
-            if not is_subscribed(user, key):
-                wait_to_be_subscribed.append(key_object)
-                success_keys.append(key)
-            else:
-                exist_keys.append(key)
-
-        add_subscribe(user, keywords=wait_to_be_subscribed)
+        wait_to_be_subscribed, has_been_subscribed = update_keywords(user_id, get_tmp(user_id))
+        success_keys = connect_keywords_to_user(user, wait_to_be_subscribed)
+        exist_keys = [key.keyword for key in has_been_subscribed]
     except:
         etype, value, tb = sys.exc_info()
-        logger.error(f'關鍵字加入失敗: {key}', exc_info=True)
+        logger.error(f'關鍵字加入失敗', exc_info=True)
         err_msg = _(f'關鍵字加入失敗，請重新操作')
         return False, success_keys, exist_keys, err_msg
 
     return True, success_keys, exist_keys, err_msg
 
 
-def keyword_exists(keyword):
-    return Keyword.objects.filter(keyword=keyword).exists()
+def update_keywords(user_id, keywords, to_rds=True, to_cache=True):
+    def rds(user_id, keywords):
+        user = User.objects.get(pk=user_id)
+
+        key_objects = []
+        wait_to_be_subscribed = []
+        has_been_subscribed = []
+        for keyword in keywords:
+            key_object = Keyword(keyword=keyword)
+            if not exists(keyword)[0]:
+                key_objects.append(key_object)
+                wait_to_be_subscribed.append(key_object)
+            elif not is_subscribed(user, keyword):
+                wait_to_be_subscribed.append(key_object)
+            else:
+                has_been_subscribed.append(key_object)
+        Keyword.objects.bulk_create(key_objects)  # 關鍵字已新增到db但是尚未與user做連結
+        return wait_to_be_subscribed, has_been_subscribed
+
+    def cache(user_id, keywords):
+        for keyword in keywords:
+            if not exists(keyword)[1]:
+                Cache.add_global_keyword(keyword, user_id)
+
+    try:
+        if to_rds:
+            wait_to_be_subscribed, has_been_subscribed = rds(user_id, keywords)
+        if to_cache:
+            cache(user_id, keywords)
+    except:
+        raise
+
+    return wait_to_be_subscribed, has_been_subscribed
+
+
+def connect_keywords_to_user(user_id, wait_to_be_subscribed, to_rds=True, to_cache=True):
+    def rds(user_id, wait_to_be_subscribed):
+
+        if len(wait_to_be_subscribed) == 0:
+            return
+        user = User.objects.get(pk=user_id)
+        user.keyword_set.add(*wait_to_be_subscribed)
+
+    def cache(user_id, keys):
+        Cache.update_user_keywords(user_id, keys)
+
+    keys = [key.keyword for key in wait_to_be_subscribed]
+    try:
+        if to_rds:
+            rds(user_id, wait_to_be_subscribed)
+        if to_cache:
+            cache(user_id, keys)
+    except:
+        raise
+
+    return keys
+
+def exists(keyword):
+    def rds(keyword):
+        return Keyword.objects.filter(keyword=keyword).exists()
+    def cache(keyword):
+        return Cache.get_global_keyword(keyword)
+
+    return (rds(keyword), cache(keyword))
 
 def is_subscribed(user, keyword):
     return user.keyword_set.filter(keyword=keyword).exists()
 
-def add_keyword(keyword):
-    key_object = None
-    try:
-        key_object = Keyword(keyword=keyword)
-        key_object.save()
-    except:
-        raise
-
-    return key_object
-
-def add_subscribe(user, *, keywords):
-    if len(keywords) == 0:
-        return
-
-    try:
-        user.keyword_set.add(*keywords)
-    except:
-        raise
-
-def get_subscribed_keywords(user):
-    pass
-
-def remove_tmp_subscribing(user, message=None):
-    if not message:
-        return []
-
-    remove_all = False
-    remove_keys = []
-    keys_num = len(KEYWORD_TMP[user.user_id])
-
-    numbers = [int(n) if int(n) > 0 and int(n) <= keys_num else -
-               1 for n in message.split(' ') if n.isnumeric()]
-
-    for n in sorted(numbers, reverse=True):
-        if n <= 0: continue
-        remove_keys.append(KEYWORD_TMP[user.user_id].pop(n-1))
-
-    if len(remove_keys) == keys_num:
-        remove_all = True
-
-    return remove_all, remove_keys
+def get_subscribed(user):
+    return Cache.get_user_keywords(user.user_id)
