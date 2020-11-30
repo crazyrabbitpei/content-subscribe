@@ -57,7 +57,7 @@ def action_confirming(user_id, result, mtype, message=None, state='2'):
     elif mtype == 'text':
         tmp_keys = Kw.get_tmp(user_id)
         delete_keys = get_delete_keys(tmp_keys, message)
-        deleted_keys = Kw.delete_tmp(user_id, tmp_keys, delete_keys)
+        deleted_keys = Kw.delete_tmp(user_id, delete_keys)
         if len(deleted_keys) == len(tmp_keys):
             state = '0'
             result['msg'] = '此次輸入的關鍵字已都移除，若要重新開始訂閱請輸入一個emoji'
