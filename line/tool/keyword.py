@@ -117,5 +117,6 @@ def exists(keyword):
 def is_subscribed(user, keyword):
     return user.keyword_set.filter(keyword=keyword).exists()
 
-def get_subscribed(user):
-    return Cache.get_user_keywords(user.user_id)
+
+def get_subscribed(user_id):
+    return Cache.get_user_keywords(user_id)

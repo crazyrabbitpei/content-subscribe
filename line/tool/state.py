@@ -26,7 +26,7 @@ def action_subscribing(user_id, result, mtype, message=None, state='1'):
     if Line.is_emoji_or_sticker(mtype):
         if len(Kw.get_tmp(user_id)) > 0:
             state = '2'
-            result['msg'] = Message.format_keyword_confirm_message(user)
+            result['msg'] = Message.format_keyword_confirm_message(user_id)
         else:
             state = '0'
             result['msg'] = '已結束關鍵字輸入，若要重新開始訂閱請輸入一個emoji'
