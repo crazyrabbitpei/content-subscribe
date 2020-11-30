@@ -33,7 +33,7 @@ def subscribe(user_id):
     try:
         wait_to_be_subscribed, has_been_subscribed = update_keywords(user_id, get_tmp(user_id))
         success_keys = connect_keywords_to_user(user_id, wait_to_be_subscribed)
-        exist_keys = [key.keyword for key in has_been_subscribed]
+        exist_keys = [key for key in has_been_subscribed]
     except:
         etype, value, tb = sys.exc_info()
         logger.error(f'關鍵字加入失敗', exc_info=True)
@@ -53,15 +53,13 @@ def update_keywords(user_id, keywords, to_rds=True, to_cache=True):
         wait_to_be_subscribed = []
         has_been_subscribed = []
         for keyword in keywords:
-            key_object = Keyword(keyword=keyword)
             if not exists(keyword)[0]:
-                key_objects.append(key_object)
-                wait_to_be_subscribed.append(key_object)
+                key_objects.append(Keyword(keyword=keyword))
             elif not is_subscribed(user, keyword):
-                wait_to_be_subscribed.append(key_object)
+                wait_to_be_subscribed.append(Keyword.objects.get(keyword=keyword))
             else:
-                has_been_subscribed.append(key_object)
-        Keyword.objects.bulk_create(key_objects)  # 關鍵字已新增到db但是尚未與user做連結
+                has_been_subscribed.append(keyword)
+        wait_to_be_subscribed.extend(Keyword.objects.bulk_create(key_objects)  )# 關鍵字已新增到db但是尚未與user做連結
         return wait_to_be_subscribed, has_been_subscribed
 
     def cache(user_id, keywords):
@@ -90,8 +88,6 @@ def connect_keywords_to_user(user_id, wait_to_be_subscribed, to_rds=True, to_cac
         logger.info(f'{user_id} connect keywords to rds')
 
         user = User.objects.get(pk=user_id)
-        keys = ','.join([key.keyword for key in user.keyword_set.all()])
-        logger.info(f'{user.user_id} new keywords: {keys}')
         user.keyword_set.add(*wait_to_be_subscribed)
 
     def cache(user_id, keys):
