@@ -72,6 +72,11 @@ def get_user_keywords(user_id):
     refresh_user_keywords_ttl(r, user_id)
     return list(r.smembers(f'user_keywords:{user_id}'))
 
+def delete_user_keywords(user_id, keywords):
+    r = redis.StrictRedis(connection_pool=pool)
+    refresh_tmp_keywords_ttl(r, user_id)
+    r.srem(f'user_keywords:{user_id}', *keywords)
+
 def refresh_user_keywords_ttl(r, user_id):
     r.expire(f'user_keywords:{user_id}', USER_INFO_TTL)
 

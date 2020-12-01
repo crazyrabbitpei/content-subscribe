@@ -43,6 +43,19 @@ def subscribe(user_id):
     return True, success_keys, exist_keys, err_msg
 
 
+def unsubscribe(user_id):
+    success_keys = []
+    err_msg = None
+    try:
+        pass
+    except:
+        etype, value, tb = sys.exc_info()
+        logger.error(f'關鍵字取消訂閱失敗', exc_info=True)
+        err_msg = _(f'關鍵字取消訂閱失敗，請重新操作')
+        return False, success_keys, err_msg
+
+    return True, success_keys, err_msg
+
 def update_keywords(user_id, keywords, to_rds=True, to_cache=True):
     def rds(user_id, keywords):
         logger.info(f'{user_id} update keywords to rds')
@@ -137,3 +150,17 @@ def get_subscribed(user_id):
         update_cache(user_id, subscribed)
 
     return subscribed
+
+
+def delete_keywords(user_id, keywords):
+    def rds(user_id, keywords):
+        logger.info(f'Delete {user_id} keywords from rds')
+        user = User.objects.get(pk=user_id)
+        key_objects = [user.keyword_set.get(keyword=keyword) for keyword in keywords]
+        user.keyword_set.remove(*key_objects)
+
+    def cache(user_id, keywords):
+        logger.info(f'Delete {user_id} keywords from cache')
+        Cache.delete_user_keywords(user_id, keywords)
+
+    return rds(user_id, keywords) and cache(user_id, keywords)

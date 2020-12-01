@@ -21,8 +21,8 @@ class State:
             result['ok'] = True
         # 依照編號刪除現有訂閱清單中的關鍵字
         elif mtype == 'emoji_text' and emoji_start_at == 0:
-            delete_keys = get_delete_keys(Kw.get_tmp(user_id), message)
-            deleted_keys = Kw.delete_tmp(user_id, delete_keys)
+            delete_keys = get_delete_keys(Kw.get_subscribed(user_id), message)
+            deleted_keys = Kw.delete_keywords(user_id, delete_keys)
             if len(deleted_keys) > 0:
                 result['msg'] = f'已移除關鍵字: {",".join(deleted_keys)}\n'
                 result['msg'] += Message.format_subscribed_keywords(user_id)
