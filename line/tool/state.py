@@ -16,8 +16,6 @@ logger = logging.getLogger(__name__)
 class State:
     @classmethod
     def action_free(cls, *, user_id, result, mtype, message=None, state='0'):
-        logger.info('in action_free')
-        logger.info(result)
         if Line.is_emoji_or_sticker(mtype):
             state = '1'
             result['msg'] = '可以開始輸入關鍵字囉\n'
@@ -28,8 +26,6 @@ class State:
             result['msg'] = msg or '搜尋好像出了點問題orz'
             result['ok'] = msg != None
 
-        logger.info('=>')
-        logger.info(result)
         return state
 
     @classmethod
@@ -109,8 +105,6 @@ def action(user, /, *, mtype, message=None):
     handler = COMMAND_STATES.get(user['state'], None)
     if handler:
         new_state = handler(user_id=user['user_id'], result=result, mtype=mtype, message=message)
-        logger.info(f'new_state: {new_state}')
-        logger.info(result)
     else:
         logger.error(f"尚未定義的 {user['user_id']} state: {new_state}")
         result['err_msg'] = _(f'服務好像出了點問題QQ')

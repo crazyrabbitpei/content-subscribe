@@ -1,4 +1,4 @@
-from line.tool.line import detect_message_type, reply_message, push_message, callback_handler
+from line.tool.line import reply_message, push_message, callback_handler
 
 from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError

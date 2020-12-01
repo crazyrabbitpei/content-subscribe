@@ -107,14 +107,19 @@ def is_emoji_or_sticker(mtype):
     return mtype == 'emoji' or mtype == 'sticker'
 
 def detect_message_type(event):
+    '''
+    訊息中如果
+        - 只有一個emoji符號而沒有任何文字則會被視為sticker
+        - 有多個emoji或是一個emoji加上文字，則會被視為text，且會有emoji欄位
+    '''
     try:
         if event.message.type == 'text':
             emojis = event.message.emojis
             if emojis:
                 logger.info(emojis)
-                return ('emoji', [(e['product_id'], e['emoji_id']) for e in emojis])
-            else:
-                return ('text', None)
+                return ('emoji', [(e['productId'], e['emojiId']) for e in emojis])
+
+            return ('text', None)
         elif event.message.type == 'sticker':
             return ('sticker', [(event.message.package_id, event.message.sticker_id)])
         else:
