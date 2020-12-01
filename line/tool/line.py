@@ -75,6 +75,7 @@ def echo(event):
         else:
             message = result['err_msg']
 
+    logger.info(result)
     try:
         reply_message(event, message)
     except:
@@ -110,8 +111,8 @@ def detect_message_type(event):
     try:
         if event.message.type == 'text':
             emojis = event.message.emojis
-            logger.info(emojis)
             if emojis:
+                logger.info(emojis)
                 return ('emoji', [(e['product_id'], e['emoji_id']) for e in emojis])
             else:
                 return ('text', None)
