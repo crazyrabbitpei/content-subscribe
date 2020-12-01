@@ -29,7 +29,7 @@ class State:
                 result['ok'] = True
             else:
                 result['msg'] = '沒有任何關鍵字被移除\n'
-                result['msg'] += Message.format_keyword_confirm_message(user_id)
+                result['msg'] += Message.format_subscribed_keywords(user_id)
                 result['ok'] = True
 
         elif Line.has_text(mtype):
