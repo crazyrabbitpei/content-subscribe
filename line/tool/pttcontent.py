@@ -49,7 +49,7 @@ def find(message):
         if not exists:
             result = es(message)
     except:
-        logger.error('搜尋 {message} 失敗', exc_info=True)
+        logger.error(f'搜尋 {message} 失敗', exc_info=True)
         return None
 
     return result

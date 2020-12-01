@@ -121,8 +121,8 @@ def detect_message_type(event):
     try:
         if event.message.type == 'text':
             emojis = event.message.emojis
+            msg = parse_message(emojis, event.message.text)
             if emojis:
-                msg = parse_message(emojis, event.message.text)
                 return ('emoji', msg, [(e['productId'], e['emojiId']) for e in emojis])
 
             return ('text', msg, None)
@@ -136,7 +136,10 @@ def detect_message_type(event):
     return (None, msg, None)
 
 
-def parse_message(emojis, message):
+def parse_message(emojis=None, message=None):
+    if not emojis:
+        return message
+
     msg = []
     m_start = 0
     for e in emojis:
