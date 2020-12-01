@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class State:
     @classmethod
-    def action_free(user_id, result, mtype, message=None, state='0'):
+    def action_free(cls, *, user_id, result, mtype, message=None, state='0'):
         logger.info('in action_free')
         logger.info(result)
         if Line.is_emoji_or_sticker(mtype):
@@ -33,7 +33,7 @@ class State:
         return state
 
     @classmethod
-    def action_subscribing(user_id, result, mtype, message=None, state='1'):
+    def action_subscribing(cls, *, user_id, result, mtype, message=None, state='1'):
         if Line.is_emoji_or_sticker(mtype):
             if len(Kw.get_tmp(user_id)) > 0:
                 state = '2'
@@ -52,7 +52,7 @@ class State:
         return state
 
     @classmethod
-    def action_confirming(user_id, result, mtype, message=None, state='2'):
+    def action_confirming(cls, *, user_id, result, mtype, message=None, state='2'):
         if Line.is_emoji_or_sticker(mtype):
             state = '0'
             ok, success_keys, exist_keys, err_msg = Kw.subscribe(user_id)
@@ -108,7 +108,7 @@ def action(user, /, *, mtype, message=None):
 
     handler = COMMAND_STATES.get(user['state'], None)
     if handler:
-        new_state = handler(user['user_id'], result, mtype, message)
+        new_state = handler(user_id=user['user_id'], result=result, mtype=mtype, message=message)
         logger.info(f'new_state: {new_state}')
         logger.info(result)
     else:
