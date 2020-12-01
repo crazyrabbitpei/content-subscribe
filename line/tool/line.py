@@ -64,12 +64,9 @@ def echo(event):
         logging.error(f'使用者 {event.source.user_id} 查找失敗', exc_info=True)
         message = _(f'好像出了問題，請試著先封鎖帳號再解封鎖試試')
     else:
-        mtype, oids = detect_message_type(event)
-        user_message = None
-        if has_text(mtype):
-            user_message = event.message.text.strip()
+        mtype, msg_text, oids = detect_message_type(event)
 
-        result = UserState.action(user, mtype=mtype, message=user_message)
+        result = UserState.action(user, mtype=mtype, message=msg_text)
 
         if result['ok']:
             message = result['msg']
@@ -120,18 +117,33 @@ def detect_message_type(event):
         - 只有一個emoji符號而沒有任何文字則會被視為sticker
         - 有多個emoji或是一個emoji加上文字，則會被視為text，且會有emoji欄位
     '''
+    msg = None
     try:
         if event.message.type == 'text':
             emojis = event.message.emojis
             if emojis:
-                return ('emoji', [(e['productId'], e['emojiId']) for e in emojis])
+                msg = parse_message(emojis, event.message.text)
+                return ('emoji', msg, [(e['productId'], e['emojiId']) for e in emojis])
 
-            return ('text', None)
+            return ('text', msg, None)
         elif event.message.type == 'sticker':
-            return ('sticker', [(event.message.package_id, event.message.sticker_id)])
+            return ('sticker', None, [(event.message.package_id, event.message.sticker_id)])
         else:
             logger.error(f'尚未定義的使用者的訊息類別: {event.message.type}')
     except:
         logger.error('判斷使用者所發出的訊息類別錯誤', exc_info=True)
 
-    return (None, None)
+    return (None, msg, None)
+
+
+def parse_message(emojis, message):
+    msg = []
+    m_start = 0
+    for e in emojis:
+        e_start = int(e['index'])
+        e_end = e_start + int(e['length'])
+
+        msg.append(message[m_start:e_start])
+        m_start = e_end + 1
+    msg.append(message[m_start:])
+    return ' '.join(msg).strip()
