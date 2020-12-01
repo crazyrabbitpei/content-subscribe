@@ -35,7 +35,7 @@ class State:
         return state
 
     @classmethod
-    def action_subscribing(cls, *, user_id, result, mtype, message=None, state='1'):
+    def action_subscribing(cls, *, user_id, result, mtype, emoji_start_at=None, message=None, state='1'):
         if Line.is_only_emoji_or_sticker(mtype):
             if len(Kw.get_tmp(user_id)) > 0:
                 state = '2'
@@ -54,7 +54,7 @@ class State:
         return state
 
     @classmethod
-    def action_confirming(cls, *, user_id, result, mtype, message=None, state='2'):
+    def action_confirming(cls, *, user_id, result, mtype, emoji_start_at=None, message=None, state='2'):
         if Line.is_only_emoji_or_sticker(mtype):
             state = '0'
             ok, success_keys, exist_keys, err_msg = Kw.subscribe(user_id)
