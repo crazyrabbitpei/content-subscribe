@@ -56,8 +56,5 @@ def action(user, /, *, mtype, message=None):
 
 
 def get_user_info(user_id):
-    try:
-        return LineUser.info(user_id)
-    except:
-        logger.error('無法得到使用者資訊', exc_info=True)
-        raise
+    return LineUser.info(user_id)
+
