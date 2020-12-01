@@ -125,10 +125,13 @@ def get_subscribed(user_id):
         logger.info(f'Get {user_id} keywords from cache')
         return Cache.get_user_keywords(user_id)
 
+    def update_cache(user_id, subscribed):
+        logger.info(f'Update {user_id} keywords to cache')
+        Cache.update_user_keywords(user_id, subscribed)
+
     subscribed = cache(user_id)
     if not subscribed:
         subscribed = rds(user_id)
-        logger.info(f'Update {user_id} keywords from rds to cache')
-        Cache.update_user_keywords(user_id, subscribed)
+        update_cache(user_id, subscribed)
 
     return subscribed
