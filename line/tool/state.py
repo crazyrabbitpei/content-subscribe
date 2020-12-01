@@ -13,12 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class State:
-    COMMAND_STATES = {
-        '0': action_free,
-        '1': action_subscribing,
-        '2': action_confirming,
-    }
-
     def action_free(self, user_id, result, mtype, message=None, state='0'):
         if Line.is_emoji_or_sticker(mtype):
             state = '1'
@@ -85,6 +79,12 @@ class State:
             result['ok'] = True
 
         return state
+
+    COMMAND_STATES = {
+        '0': action_free,
+        '1': action_subscribing,
+        '2': action_confirming,
+    }
 
 def action(user, /, *, mtype, message=None):
     def update_user_state(user, new_state):
