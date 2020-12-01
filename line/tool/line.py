@@ -162,7 +162,7 @@ def detect_message_type(event):
     except:
         logger.error('判斷使用者所發出的訊息類別錯誤', exc_info=True)
 
-    return (None, msg, None)
+    return (msg_type, msg, emoji_start_at, emojis)
 
 
 def parse_message(emojis=None, message=None):
