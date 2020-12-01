@@ -50,7 +50,9 @@ def info(user_id):
         logger.info(f'Get {user_id} info from cache')
         return Cache.get_user_info(user_id)
 
-    def update_cache(user_id, user_info):
+    def update_cache(user_id, user_info=None):
+        if not user_info:
+            return
         logger.info(f'Update {user_id} info to cache')
         Cache.update_user_info(user_id, user_info)
 

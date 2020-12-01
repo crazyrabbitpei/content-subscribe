@@ -125,7 +125,9 @@ def get_subscribed(user_id):
         logger.info(f'Get {user_id} keywords from cache')
         return Cache.get_user_keywords(user_id)
 
-    def update_cache(user_id, subscribed):
+    def update_cache(user_id, subscribed=None):
+        if not subscribed:
+            return
         logger.info(f'Update {user_id} keywords to cache')
         Cache.update_user_keywords(user_id, subscribed)
 
