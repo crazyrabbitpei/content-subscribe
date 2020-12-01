@@ -106,7 +106,7 @@ def action(user, /, *, mtype, message=None):
         'err_msg': None,
     }
 
-    handler = State.COMMAND_STATES.get(user['state'], None)
+    handler = COMMAND_STATES.get(user['state'], None)
     if handler:
         new_state = handler(user['user_id'], result, mtype, message)
         logger.info(f'new_state: {new_state}')
@@ -116,7 +116,7 @@ def action(user, /, *, mtype, message=None):
         result['err_msg'] = _(f'服務好像出了點問題QQ')
         return result
 
-    if new_state not in State.COMMAND_STATES:
+    if new_state not in COMMAND_STATES:
         logger.error(f'新的state尚未定義，故無法更新 {user["user_id"]} state: {new_state}')
         result['err_msg'] = _(f'服務好像出了點問題QQ')
         return result
