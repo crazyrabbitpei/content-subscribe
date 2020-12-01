@@ -66,8 +66,9 @@ def echo(event):
     else:
         mtype, oids = detect_message_type(event)
         user_message = None
-        if mtype == 'text':
+        if has_text(mtype):
             user_message = event.message.text.strip()
+
         result = UserState.action(user, mtype=mtype, message=user_message)
 
         if result['ok']:
@@ -106,6 +107,13 @@ def push_message(user_id, message=None):
 def is_emoji_or_sticker(mtype):
     return mtype == 'emoji' or mtype == 'sticker'
 
+
+def has_text(mtype):
+    '''
+    訊息中含有emoji或text
+    '''
+    return mtype == 'emoji' or mtype == 'text'
+
 def detect_message_type(event):
     '''
     訊息中如果
@@ -116,8 +124,6 @@ def detect_message_type(event):
         if event.message.type == 'text':
             emojis = event.message.emojis
             if emojis:
-                logger.info(emojis)
-                logger.info(event.message.text)
                 return ('emoji', [(e['productId'], e['emojiId']) for e in emojis])
 
             return ('text', None)
