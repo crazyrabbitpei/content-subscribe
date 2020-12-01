@@ -6,12 +6,13 @@ import logging, sys
 from collections import defaultdict
 logger = logging.getLogger(__name__)
 
+# TODO: 取消訂閱
 
 def get_tmp(user_id):
     return Cache.get_tmp_keywords(user_id)
 
 def add_tmp(user_id, keyword):
-    return Cache.add_tmp_keyword(user_id, keyword)
+    Cache.add_tmp_keyword(user_id, keyword)
 
 def delete_tmp(user_id, keys=None):
     if not keys:
