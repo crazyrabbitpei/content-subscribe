@@ -12,6 +12,7 @@ from linebot.models import (
 
 import line.tool.user as LineUser
 import line.tool.state as UserState
+import line.tool.message as Message
 
 from django.utils.translation import gettext_lazy as _
 
@@ -32,7 +33,8 @@ def callback_handler(body, signature):
 
 @handler.add(FollowEvent)
 def follow(event):
-    message = _('開始輸入任何你想查找的ptt內容吧！\n或是輸入任一個emoji符號來開始訂閱關鍵字~')
+    message = Message.menu()
+
     try:
         LineUser.create(event.source.user_id)
     except:
@@ -64,9 +66,9 @@ def echo(event):
         logging.error(f'使用者 {event.source.user_id} 查找失敗', exc_info=True)
         message = _(f'好像出了問題，請試著先封鎖帳號再解封鎖試試')
     else:
-        mtype, msg_text, oids = detect_message_type(event)
+        mtype, msg_text, emoji_start_at, oids = detect_message_type(event)
 
-        result = UserState.action(user, mtype=mtype, message=msg_text)
+        result = UserState.action(user, mtype=mtype, emoji_start_at=emoji_start_at, message=msg_text)
 
         if result['ok']:
             message = result['msg']
@@ -101,8 +103,20 @@ def push_message(user_id, message=None):
 
     return True
 
-def is_emoji_or_sticker(mtype):
+
+def is_only_emoji_or_sticker(mtype):
+    '''
+    只有emoji符號或是貼圖
+    '''
     return mtype == 'emoji' or mtype == 'sticker'
+
+
+def start_with_emoji(mtype, emojis, message):
+    '''
+    emoji符號後跟著字串
+    '''
+    if not message:
+        return False
 
 
 def has_text(mtype):
@@ -114,20 +128,35 @@ def has_text(mtype):
 def detect_message_type(event):
     '''
     訊息中如果
-        - 只有一個emoji符號而沒有任何文字則會被視為sticker
+        - 只有一個emoji符號而沒有任何文字則會被視為sticker: 回傳sticker
         - 有多個emoji或是一個emoji加上文字，則會被視為text，且會有emoji欄位
+            - 僅有text: 回傳text
+            - 僅有emoji: 回傳emoji
+            - 包含emoji和text: 回傳emoji_text
     '''
+    msg_type = None
     msg = None
+    emojis = None
+    emoji_start_at = None
     try:
         if event.message.type == 'text':
-            emojis = event.message.emojis
-            msg = parse_message(emojis, event.message.text)
-            if emojis:
-                return ('emoji', msg, [(e['productId'], e['emojiId']) for e in emojis])
+            if event.message.emojis:
+                emojis = [(e['productId'], e['emojiId']) for e in event.message.emojis]
 
-            return ('text', msg, None)
+            emoji_start_at, msg = parse_message(emojis, event.message.text)
+
+            if emojis and msg:
+                msg_type = 'emoji_text'
+            elif emojis:
+                msg_type = 'emoji'
+            else:
+                msg_type = 'text'
+
+            return (msg_type, msg, emoji_start_at, emojis)
+
         elif event.message.type == 'sticker':
-            return ('sticker', None, [(event.message.package_id, event.message.sticker_id)])
+            msg_type = 'sticker'
+            return (msg_type, msg, 0, [(event.message.package_id, event.message.sticker_id)])
         else:
             logger.error(f'尚未定義的使用者的訊息類別: {event.message.type}')
     except:
@@ -138,9 +167,10 @@ def detect_message_type(event):
 
 def parse_message(emojis=None, message=None):
     if not emojis:
-        return message
+        return None, message
 
     msg = []
+    emoji_start_at = int(emojis[0]['index'])
     m_start = 0
     for e in emojis:
         e_start = int(e['index'])
@@ -149,4 +179,4 @@ def parse_message(emojis=None, message=None):
         msg.append(message[m_start:e_start])
         m_start = e_end + 1
     msg.append(message[m_start:])
-    return ' '.join(msg).strip()
+    return emoji_start_at, ' '.join(msg).strip()

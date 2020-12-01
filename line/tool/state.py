@@ -11,16 +11,22 @@ from django.utils.translation import gettext_lazy as _
 import logging
 logger = logging.getLogger(__name__)
 
-
-
 class State:
     @classmethod
-    def action_free(cls, *, user_id, result, mtype, message=None, state='0'):
-        if Line.is_emoji_or_sticker(mtype):
+    def action_free(cls, *, user_id, result, mtype, emoji_start_at=None, message=None, state='0'):
+        if Line.is_only_emoji_or_sticker(mtype):
             state = '1'
             result['msg'] = '可以開始輸入關鍵字囉\n'
             result['msg'] += Message.format_subscribed_keywords(user_id)
             result['ok'] = True
+        # 依照編號刪除現有訂閱清單中的關鍵字
+        elif mtype == 'emoji_text' and emoji_start_at == 0:
+            delete_keys = get_delete_keys(Kw.get_tmp(user_id), message)
+            deleted_keys = Kw.delete_tmp(user_id, delete_keys)
+            if len(deleted_keys) > 0:
+                result['msg'] = f'已移除關鍵字: {",".join(deleted_keys)}\n'
+                result['msg'] += Message.format_subscribed_keywords(user_id)
+
         elif mtype == 'text':
             msg = Source.find(message)
             result['msg'] = msg or '搜尋好像出了點問題orz'
@@ -30,7 +36,7 @@ class State:
 
     @classmethod
     def action_subscribing(cls, *, user_id, result, mtype, message=None, state='1'):
-        if Line.is_emoji_or_sticker(mtype):
+        if Line.is_only_emoji_or_sticker(mtype):
             if len(Kw.get_tmp(user_id)) > 0:
                 state = '2'
                 result['msg'] = Message.format_keyword_confirm_message(user_id)
@@ -49,7 +55,7 @@ class State:
 
     @classmethod
     def action_confirming(cls, *, user_id, result, mtype, message=None, state='2'):
-        if Line.is_emoji_or_sticker(mtype):
+        if Line.is_only_emoji_or_sticker(mtype):
             state = '0'
             ok, success_keys, exist_keys, err_msg = Kw.subscribe(user_id)
             result['ok'] = ok
@@ -90,7 +96,9 @@ COMMAND_STATES = {
     '1': State.action_subscribing,
     '2': State.action_confirming,
 }
-def action(user, /, *, mtype, message=None):
+
+
+def action(user, /, *, mtype, emoji_start_at=None, message=None):
     def update_user_state(user, new_state):
         return LineUser.update_state(user, new_state)
 
@@ -104,7 +112,8 @@ def action(user, /, *, mtype, message=None):
 
     handler = COMMAND_STATES.get(user['state'], None)
     if handler:
-        new_state = handler(user_id=user['user_id'], result=result, mtype=mtype, message=message)
+        new_state = handler(
+            user_id=user['user_id'], result=result, mtype=mtype, emoji_start_at=emoji_start_at, message=message)
     else:
         logger.error(f"尚未定義的 {user['user_id']} state: {new_state}")
         result['err_msg'] = _(f'服務好像出了點問題QQ')

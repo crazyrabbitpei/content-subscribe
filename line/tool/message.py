@@ -25,3 +25,11 @@ def format_subscribed_keywords(user_id):
         msg += '\n還沒有任何訂閱喔!'
 
     return msg
+
+def menu():
+    msg = '==功能==\n'
+    msg += '1) 查詢: 輸入任何想查詢的字詞\n'
+    msg += '2) 訂閱關鍵字: 輸入任何一個emoji\n'
+    msg += '3) 刪除已訂閱的關鍵字: 輸入一個emoji然後加上要刪除的關鍵字編號，可一次輸入多筆，每筆以空格區隔'
+
+    return msg
