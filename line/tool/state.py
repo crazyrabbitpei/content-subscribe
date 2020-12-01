@@ -27,7 +27,7 @@ class State:
                 result['msg'] = f'已移除關鍵字: {",".join(deleted_keys)}\n'
                 result['msg'] += Message.format_subscribed_keywords(user_id)
 
-        elif mtype == 'text':
+        elif Line.has_text(mtype):
             msg = Source.find(message)
             result['msg'] = msg or '搜尋好像出了點問題orz'
             result['ok'] = msg != None
@@ -46,7 +46,7 @@ class State:
                 result['msg'] += Message.format_subscribed_keywords(user_id)
 
             result['ok'] = True
-        elif mtype == 'text':
+        elif Line.has_text(mtype):
             Kw.add_tmp(user_id, message)
             result['msg'] = '繼續輸入下一筆，或是用一個emoji來結束關鍵字輸入'
             result['ok'] = True
@@ -70,7 +70,7 @@ class State:
             msg += Message.format_subscribed_keywords(user_id)
 
             result['msg'] = msg
-        elif mtype == 'text':
+        elif Line.has_text(mtype):
             tmp_keys = Kw.get_tmp(user_id)
             delete_keys = get_delete_keys(tmp_keys, message)
             deleted_keys = Kw.delete_tmp(user_id, delete_keys)

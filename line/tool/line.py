@@ -123,7 +123,7 @@ def has_text(mtype):
     '''
     訊息中含有emoji或text
     '''
-    return mtype == 'emoji' or mtype == 'text'
+    return mtype == 'emoji_text' or mtype == 'text'
 
 def detect_message_type(event):
     '''
