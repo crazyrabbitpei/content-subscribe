@@ -10,8 +10,9 @@ from linebot.models import (
     MessageEvent, FollowEvent, UnfollowEvent, TextSendMessage, TemplateSendMessage, ButtonsTemplate, ConfirmTemplate, CarouselTemplate, MessageAction
 )
 
-from line.tool import get_user_info, action
 import line.tool.user as LineUser
+import line.tool.state as UserState
+
 from django.utils.translation import gettext_lazy as _
 
 line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
@@ -58,7 +59,7 @@ def unfollow(event):
 def echo(event):
     message = None
     try:
-        user = get_user_info(event.source.user_id)
+        user = LineUser.info(event.source.user_id)
     except:
         logging.error(f'使用者 {event.source.user_id} 查找失敗', exc_info=True)
         message = _(f'好像出了問題，請試著先封鎖帳號再解封鎖試試')
@@ -67,7 +68,7 @@ def echo(event):
         user_message = None
         if mtype == 'text':
             user_message = event.message.text.strip()
-        result = action(user, mtype=mtype, message=user_message)
+        result = UserState.action(user, mtype=mtype, message=user_message)
 
         if result['ok']:
             message = result['msg']

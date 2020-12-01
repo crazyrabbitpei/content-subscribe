@@ -1,6 +1,4 @@
-import line.tool.user as LineUser
 from line.tool.line import detect_message_type, reply_message, push_message, callback_handler
-from line.models import User, Keyword
 
 from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
