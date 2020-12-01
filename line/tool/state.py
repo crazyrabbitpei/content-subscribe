@@ -25,6 +25,7 @@ class State:
             result['msg'] = msg or '搜尋好像出了點問題orz'
             result['ok'] = msg != None
 
+        logger.info(result)
         return state
 
     def action_subscribing(self, user_id, result, mtype, message=None, state='1'):
