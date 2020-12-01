@@ -117,6 +117,7 @@ def detect_message_type(event):
             emojis = event.message.emojis
             if emojis:
                 logger.info(emojis)
+                logger.ingo(event.message.text)
                 return ('emoji', [(e['productId'], e['emojiId']) for e in emojis])
 
             return ('text', None)
