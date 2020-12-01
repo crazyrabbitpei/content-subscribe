@@ -101,6 +101,8 @@ def action(user, /, *, mtype, message=None):
     handler = State.COMMAND_STATES.get(user['state'], None)
     if handler:
         new_state = handler(user['user_id'], result, mtype, message)
+        logger.info('new_state: {new_state}')
+        logger.info(result)
     else:
         logger.error(f"尚未定義的 {user['user_id']} state: {new_state}")
         result['err_msg'] = _(f'服務好像出了點問題QQ')
