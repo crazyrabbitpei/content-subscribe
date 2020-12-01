@@ -13,8 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 class State:
-    def action_free(self, user_id, result, mtype, message=None, state='0'):
+    @classmethod
+    def action_free(user_id, result, mtype, message=None, state='0'):
         logger.info('in action_free')
+        logger.info(result)
         if Line.is_emoji_or_sticker(mtype):
             state = '1'
             result['msg'] = '可以開始輸入關鍵字囉\n'
@@ -25,10 +27,12 @@ class State:
             result['msg'] = msg or '搜尋好像出了點問題orz'
             result['ok'] = msg != None
 
+        logger.info('=>')
         logger.info(result)
         return state
 
-    def action_subscribing(self, user_id, result, mtype, message=None, state='1'):
+    @classmethod
+    def action_subscribing(user_id, result, mtype, message=None, state='1'):
         if Line.is_emoji_or_sticker(mtype):
             if len(Kw.get_tmp(user_id)) > 0:
                 state = '2'
@@ -46,7 +50,8 @@ class State:
 
         return state
 
-    def action_confirming(self, user_id, result, mtype, message=None, state='2'):
+    @classmethod
+    def action_confirming(user_id, result, mtype, message=None, state='2'):
         if Line.is_emoji_or_sticker(mtype):
             state = '0'
             ok, success_keys, exist_keys, err_msg = Kw.subscribe(user_id)
