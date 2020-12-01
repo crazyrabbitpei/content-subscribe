@@ -72,13 +72,10 @@ def update_keywords(user_id, keywords, to_rds=True, to_cache=True):
     if len(keywords) == 0:
         return [], []
 
-    try:
-        if to_rds:
-            wait_to_be_subscribed, has_been_subscribed = rds(user_id, keywords)
-        if to_cache:
-            cache(user_id, keywords)
-    except:
-        raise
+    if to_rds:
+        wait_to_be_subscribed, has_been_subscribed = rds(user_id, keywords)
+    if to_cache:
+        cache(user_id, keywords)
 
     return wait_to_be_subscribed, has_been_subscribed
 
@@ -98,13 +95,11 @@ def connect_keywords_to_user(user_id, wait_to_be_subscribed, to_rds=True, to_cac
         return []
 
     keys = [key.keyword for key in wait_to_be_subscribed]
-    try:
-        if to_rds:
-            rds(user_id, wait_to_be_subscribed)
-        if to_cache:
-            cache(user_id, keys)
-    except:
-        raise
+
+    if to_rds:
+        rds(user_id, wait_to_be_subscribed)
+    if to_cache:
+        cache(user_id, keys)
 
     return keys
 
@@ -121,4 +116,19 @@ def is_subscribed(user, keyword):
 
 
 def get_subscribed(user_id):
-    return Cache.get_user_keywords(user_id)
+    def rds(user_id):
+        logger.info(f'Get {user_id} keywords from rds')
+        user = User.objects.get(pk=user_id)
+        return [key.keyword for key in user.keyword_set.all()]
+
+    def cache(user_id):
+        logger.info(f'Get {user_id} keywords from cache')
+        return Cache.get_user_keywords(user_id)
+
+    subscribed = cache(user_id)
+    if not subscribed:
+        subscribed = rds(user_id)
+        logger.info(f'Update {user_id} keywords from rds to cache')
+        Cache.update_user_keywords(user_id, subscribed)
+
+    return subscribed
