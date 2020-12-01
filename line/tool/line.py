@@ -75,7 +75,6 @@ def echo(event):
         else:
             message = result['err_msg']
 
-    logger.info(result)
     try:
         reply_message(event, message)
     except:
