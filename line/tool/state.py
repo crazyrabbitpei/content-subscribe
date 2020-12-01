@@ -36,7 +36,7 @@ class State:
                 result['msg'] = Message.format_keyword_confirm_message(user_id)
             else:
                 state = '0'
-                result['msg'] = '已結束關鍵字輸入，若要重新開始訂閱請輸入一個emoji'
+                result['msg'] = '已結束關鍵字輸入，若要重新開始訂閱請輸入一個emoji\n'
                 result['msg'] += Message.format_subscribed_keywords(user_id)
 
             result['ok'] = True
