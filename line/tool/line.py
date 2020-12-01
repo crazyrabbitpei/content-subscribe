@@ -143,7 +143,7 @@ def detect_message_type(event):
             if event.message.emojis:
                 emojis = [(e['productId'], e['emojiId']) for e in event.message.emojis]
 
-            emoji_start_at, msg = parse_message(emojis, event.message.text)
+            emoji_start_at, msg = parse_message(event.message.emojis, event.message.text)
 
             if emojis and msg:
                 msg_type = 'emoji_text'
