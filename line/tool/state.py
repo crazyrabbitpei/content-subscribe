@@ -11,6 +11,11 @@ from django.utils.translation import gettext_lazy as _
 import logging
 logger = logging.getLogger(__name__)
 
+COMMAND_STATES = {
+    '0': State.action_free,
+    '1': State.action_subscribing,
+    '2': State.action_confirming,
+}
 
 class State:
     @classmethod
@@ -87,11 +92,7 @@ class State:
 
         return state
 
-    COMMAND_STATES = {
-        '0': action_free,
-        '1': action_subscribing,
-        '2': action_confirming,
-    }
+
 
 def action(user, /, *, mtype, message=None):
     def update_user_state(user, new_state):
