@@ -9,7 +9,7 @@ def detect_message_type(event):
         if event.message.type == 'text':
             emojis = event.message.emojis
             if emojis:
-                return ('emoji', [(e.product_id, e.emoji_id) for e in emojis])
+                return ('emoji', [(e['product_id'], e['emoji_id']) for e in emojis])
             else:
                 return ('text', None)
         if event.message.type == 'sticker':
