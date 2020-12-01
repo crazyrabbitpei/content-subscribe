@@ -177,6 +177,6 @@ def parse_message(emojis=None, message=None):
         e_end = e_start + int(e['length'])
 
         msg.append(message[m_start:e_start])
-        m_start = e_end + 1
+        m_start = e_end
     msg.append(message[m_start:])
     return emoji_start_at, ' '.join(msg).strip()
