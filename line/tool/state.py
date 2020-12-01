@@ -1,6 +1,5 @@
 import line.tool.cache as Cache
 import line.tool.user as LineUser
-import line.tool.state as UserState
 import line.tool.keyword as Kw
 import line.tool.line as Line
 import line.tool.message as Message
@@ -13,9 +12,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 COMMAND_STATES = {
-    '0': UserState.action_free,
-    '1': UserState.action_subscribing,
-    '2': UserState.action_confirming,
+    '0': action_free,
+    '1': action_subscribing,
+    '2': action_confirming,
 }
 
 def action(user, /, *, mtype, message=None):
