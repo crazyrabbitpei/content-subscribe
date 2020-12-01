@@ -158,9 +158,12 @@ def delete_keywords(user_id, keywords):
         user = User.objects.get(pk=user_id)
         key_objects = [user.keyword_set.get(keyword=keyword) for keyword in keywords]
         user.keyword_set.remove(*key_objects)
+        return [key.keyword for key in key_objects]
 
     def cache(user_id, keywords):
         logger.info(f'Delete {user_id} keywords from cache')
         Cache.delete_user_keywords(user_id, keywords)
 
-    return rds(user_id, keywords) and cache(user_id, keywords)
+    deleted_keys = rds(user_id, keywords)
+    cache(user_id, keywords)
+    return deleted_keys
