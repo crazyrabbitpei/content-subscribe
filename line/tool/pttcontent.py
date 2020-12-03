@@ -12,7 +12,7 @@ def format_find_message(keyword, result):
     for index, hit in enumerate(hits):
         count_board[hit['_source']['board']].append(hit)
 
-    board_info = ' ,'.join(
+    board_info = ', '.join(
         [f'{key}({len(value)})' for key, value in count_board.items()])
 
     message = f'共有 {len(hits)} 筆 {keyword} 結果, {board_info}\n'
