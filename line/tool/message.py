@@ -2,9 +2,9 @@ import line.tool.cache as Cache
 
 import line.tool.keyword as Kw
 from collections import defaultdict
-import logging
+import logging, os
 logger = logging.getLogger(__name__)
-
+logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 
 def format_keyword_confirm_message(user_id):
     msg = '請確認以下關鍵字是否正確:\n'

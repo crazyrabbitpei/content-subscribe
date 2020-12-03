@@ -20,7 +20,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, Http
 from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 
 # Create your views here.
 @csrf_exempt

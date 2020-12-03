@@ -8,8 +8,9 @@ import line.tool.es as Es
 
 from django.utils.translation import gettext_lazy as _
 
-import logging
+import logging, os
 logger = logging.getLogger(__name__)
+logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 
 class State:
     @classmethod

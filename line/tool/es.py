@@ -2,6 +2,7 @@ import os
 from elasticsearch import Elasticsearch
 import logging
 logger = logging.getLogger(__name__)
+logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 
 client = Elasticsearch(
     http_auth=(os.getenv('ES_USER'), os.getenv("ES_PASSWD")),

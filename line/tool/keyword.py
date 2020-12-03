@@ -2,9 +2,10 @@ import line.tool.cache as Cache
 
 from line.models import Keyword, User
 from django.utils.translation import gettext_lazy as _
-import logging, sys
+import logging, sys, os
 from collections import defaultdict
 logger = logging.getLogger(__name__)
+logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 
 def get_tmp(user_id):
     return Cache.get_tmp_keywords(user_id)

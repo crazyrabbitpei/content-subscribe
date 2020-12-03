@@ -3,8 +3,9 @@ import line.tool.cache as Cache
 import line.tool.es as Es
 from collections import defaultdict
 
-import logging
+import logging, os
 logger = logging.getLogger(__name__)
+logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 
 def format_find_message(keyword, result):
     hits = result['hits']['hits']

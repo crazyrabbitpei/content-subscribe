@@ -1,12 +1,13 @@
 import line.tool.cache as Cache
 
-import sys
+import sys, os
 from line.models import Keyword, User
 
 from line.models import User, Keyword
 
 import logging
 logger = logging.getLogger(__name__)
+logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 
 
 def create(user_id):
