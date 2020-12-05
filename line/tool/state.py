@@ -34,7 +34,7 @@ class State:
                 result['ok'] = True
 
         elif Line.has_text(mtype):
-            msg = Source.find(message)
+            msg = Source.find(index=os.getenv('ES_INDEX'), message=message)
             result['msg'] = msg or '搜尋好像出了點問題orz'
             result['ok'] = msg != None
 

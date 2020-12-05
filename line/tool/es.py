@@ -32,7 +32,7 @@ es_search_filters = [
 ]
 
 
-def find(*, source, keyword=None, patterns=None, filters=None):
+def find(*, index, keyword=None, patterns=None, filters=None):
     result = None
     search = {
         "query": {
@@ -43,7 +43,7 @@ def find(*, source, keyword=None, patterns=None, filters=None):
         }
     }
     try:
-        result = client.search(body=search)
+        result = client.search(index=index, body=search)
     except:
         logger.error('搜尋es失敗', exc_info=True)
         raise

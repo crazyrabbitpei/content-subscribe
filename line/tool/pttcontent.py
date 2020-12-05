@@ -36,10 +36,10 @@ def format_find_message(keyword, result):
     return message
 
 
-def find(message):
+def find(index, message):
     def es(message):
         Es.es_search_patterns[0]['match']['content']['query'] = message
-        result = Es.find(source='ptt', keyword=message, patterns=Es.es_search_patterns, filters=Es.es_search_patterns)
+        result = Es.find(index=index, keyword=message, patterns=Es.es_search_patterns, filters=Es.es_search_patterns)
         return format_find_message(message, result)
 
     def cache(message):
