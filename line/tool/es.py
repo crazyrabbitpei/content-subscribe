@@ -12,6 +12,9 @@ client = Elasticsearch(
     ssl_show_warn=False,
     scheme='https',
     port=int(os.getenv('ES_PORT')),
+    timeout=60,
+    max_retries=10,
+    retry_on_timeout=True
 )
 es_search_patterns = [
     {
