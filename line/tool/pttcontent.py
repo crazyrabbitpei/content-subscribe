@@ -28,7 +28,7 @@ def format_find_message(keyword, result):
 
             title = info['_source'].get('title', '')
             time = info['_source'].get('time', '')
-            message += f"[{index}]{category} {title}\n"
+            message += f"{index}) [{category}] {title}\n"
             message += f"發文時間: {time}\n"
             message += f"{info['_source']['url']}\n"
             index += 1
