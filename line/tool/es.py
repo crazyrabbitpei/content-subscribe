@@ -18,10 +18,8 @@ client = Elasticsearch(
 )
 es_search_patterns = [
     {
-        "match": {
+        "match_phrase": {
             "content": {
-                # 使用and 或 or來決定搜尋字詞(斷詞後)要全部符合或是有其中一項即可，預設or
-                "operator": "and",
                 #"minimum_should_match": 3,  # 若operator為
                 "query": ""
             }
@@ -31,13 +29,20 @@ es_search_patterns = [
 
 es_search_filters = [
     #{"term":  {"is_reply": False}},
-    {"range": {"time": {"gte": "now-15d"}}}
+    {"range": {"time": {"gte": "now-14d"}}}
 ]
 
 
 def find(*, index, keyword=None, patterns=None, filters=None):
     result = None
     search = {
+        "sort": [
+            {
+                "time": {
+                    "order": "desc"
+                }
+            }
+        ],
         "query": {
             "bool": {
                 "must": patterns,

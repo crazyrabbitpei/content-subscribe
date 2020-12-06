@@ -38,7 +38,7 @@ def format_find_message(keyword, result):
 
 def find(index, message):
     def es(message):
-        Es.es_search_patterns[0]['match']['content']['query'] = message
+        Es.es_search_patterns[0]['match_phrase']['content']['query'] = message
         result = Es.find(index=index, keyword=message, patterns=Es.es_search_patterns, filters=Es.es_search_patterns)
         return format_find_message(message, result)
 
