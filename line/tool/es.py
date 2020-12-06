@@ -40,6 +40,7 @@ es_search_filters = [
 def find(*, index, keyword=None, patterns=None, filters=None):
     result = None
     search = {
+        "size": 150,
         "sort": [
             {
                 "time": {
