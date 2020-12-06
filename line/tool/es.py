@@ -1,6 +1,11 @@
 import os
 from elasticsearch import Elasticsearch
 import logging
+import configparser
+
+config = configparser.ConfigParser()
+config.read(os.environ.get('SETTING', 'settings.ini'))
+
 logger = logging.getLogger(__name__)
 logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 
@@ -10,10 +15,9 @@ client = Elasticsearch(
     use_ssl=True,
     verify_cert=False,
     ssl_show_warn=False,
-    scheme='https',
     port=int(os.getenv('ES_PORT')),
-    timeout=60,
-    max_retries=10,
+    timeout=int(config['REQUEST']['timeout']),
+    max_retries=int(config['REQUEST']['max_retries']),
     retry_on_timeout=True
 )
 es_search_patterns = [
