@@ -39,7 +39,18 @@ es_search_filters = [
 
 def find(*, index, keyword=None, patterns=None, filters=None):
     result = None
-    search = {
+
+    try:
+        result = client.search(index=index, body=gen_body(patterns=patterns, filters=filters))
+    except:
+        logger.error('搜尋es失敗', exc_info=True)
+        raise
+
+    return result
+
+
+def gen_body(*, patterns, filters):
+    return {
         "size": 150,
         "sort": [
             {
@@ -55,10 +66,3 @@ def find(*, index, keyword=None, patterns=None, filters=None):
             }
         }
     }
-    try:
-        result = client.search(index=index, body=search)
-    except:
-        logger.error('搜尋es失敗', exc_info=True)
-        raise
-
-    return result
