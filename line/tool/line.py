@@ -91,7 +91,7 @@ def reply_message(event, message=None):
             TextSendMessage(text=f'{message}'))
     except LineBotApiError as e:
         etype, value, tb = sys.exc_info()
-        logger.error(f'Reply api error {etype}', exc_info=True)
+        logger.error(f'Reply api error {etype}: {event.reply_token}', exc_info=True)
         return False
     return True
 

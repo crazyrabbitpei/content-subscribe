@@ -35,7 +35,10 @@ class State:
 
         elif Line.has_text(mtype):
             msg = Source.find(index=os.getenv('ES_INDEX'), message=message)
-            result['msg'] = msg or '搜尋好像出了點問題orz'
+            result['msg'] = msg
+            if not msg:
+                result['msg'] = '搜尋好像出了點問題orz'
+
             result['ok'] = msg != None
 
         return state
