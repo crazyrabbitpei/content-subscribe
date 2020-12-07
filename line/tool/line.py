@@ -67,6 +67,7 @@ def echo(event):
         logging.error(f'使用者 {event.source.user_id} 查找失敗', exc_info=True)
         message = _(f'好像出了問題，請試著先封鎖帳號再解封鎖試試')
     else:
+        logger.info(f'Reply token: {event.reply_token}')
         mtype, msg_text, emoji_start_at, oids = detect_message_type(event)
 
         result = UserState.action(user, mtype=mtype, emoji_start_at=emoji_start_at, message=msg_text)
