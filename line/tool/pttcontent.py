@@ -29,12 +29,13 @@ def format_find_message(keyword, result):
             title = info['_source'].get('title', '')
             time = info['_source'].get('time', '')
             is_reply = info['_source'].get('is_reply', False)
-            if not is_reply and category:
-                message += f"{index}) {title}\n"
-            elif not is_reply:
-                message += f"{index}) [{category}] {title}\n"
-            else:
-                message += f"{index}) Re: [{category}] {title}\n"
+            message += f"{index})"
+            if is_reply:
+                message += f" Re:"
+            if category:
+                message += f" [{category}]"
+
+            message += f" {title}\n"
 
             message += f"發文時間: {time}\n"
             message += f"{info['_source']['url']}\n"
