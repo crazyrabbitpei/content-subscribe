@@ -51,7 +51,7 @@ def find(*, index, keyword=None, patterns=None, filters=None):
 
 def gen_body(*, patterns, filters):
     return {
-        "size": 50,
+        "size": 20,
         "sort": [
             {
                 "time": {
