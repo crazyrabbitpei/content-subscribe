@@ -86,7 +86,7 @@ def reply_message(event, message=None):
     if not message:
         message = _('系統維護中，稍等一下喔QQ')
     elif len(message) > 5000:
-        message = _('測試版，無法顯示大於5000字的結果orz')
+        message = message[:5000]
 
     try:
         line_bot_api.reply_message(
