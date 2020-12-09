@@ -15,7 +15,6 @@ client = Elasticsearch(
     use_ssl=True,
     verify_cert=False,
     ssl_show_warn=False,
-    port=int(os.getenv('ES_PORT')),
     timeout=int(config['REQUEST']['timeout']),
     max_retries=int(config['REQUEST']['max_retries']),
     retry_on_timeout=True
