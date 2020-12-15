@@ -63,6 +63,7 @@ def sub_global_keywords(user_id, *, keywords):
     r = redis.StrictRedis(connection_pool=pool)
     for keyword in keywords:
         r.zincrby(f'keyword:subcount', 1, keyword)
+        r.sadd(f'keyword_users:{keyword}', user_id)
 
 def init_global_keywords(keyword_counts):
     r = redis.StrictRedis(connection_pool=pool)
@@ -75,8 +76,14 @@ def unsub_global_keywords(user_id, *, keywords):
     for keyword in keywords:
         if get_global_keyword(keyword) == 1:
             r.zrem(f'keyword:subcount', keyword)
+            r.delete(f'keyword_users:{keyword}')
         else:
             r.zincrby(f'keyword:subcount', -1, keyword)
+            r.srem(f'keyword_users:{keyword}', user_id)
+
+def get_keyword_user(keyword):
+    r = redis.StrictRedis(connection_pool=pool)
+    return list(r.smembers(f'keyword_users:{keyword}'))
 
 def update_user_keywords(user_id, keywords):
     r = redis.StrictRedis(connection_pool=pool)
