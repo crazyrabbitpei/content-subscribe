@@ -61,9 +61,8 @@ def get_global_keyword(keyword):
 
 def sub_global_keywords(user_id, *, keywords):
     r = redis.StrictRedis(connection_pool=pool)
-    ks = set(keywords) - set(get_user_keywords(user_id))
-    for k in ks:
-        r.zincrby(f'keyword:subcount', k, 1)
+    for keyword in keywords:
+        r.zincrby(f'keyword:subcount', keyword, 1)
 
 def init_global_keywords(keyword_counts):
     r = redis.StrictRedis(connection_pool=pool)
@@ -73,19 +72,19 @@ def init_global_keywords(keyword_counts):
 
 def unsub_global_keywords(user_id, *, keywords):
     r = redis.StrictRedis(connection_pool=pool)
-    ks = set(keywords) & set(get_user_keywords(user_id))
-    for k in ks:
-        if get_global_keyword(k) == 1:
-            r.zrem(f'keyword:subcount', k)
+    for keyword in keywords:
+        if get_global_keyword(keyword) == 1:
+            r.zrem(f'keyword:subcount', keyword)
         else:
-            r.zincrby(f'keyword:subcount', k, -1)
+            r.zincrby(f'keyword:subcount', keyword, -1)
 
 def update_user_keywords(user_id, keywords):
     r = redis.StrictRedis(connection_pool=pool)
     refresh_user_keywords_ttl(r, user_id)
 
-    r.sadd(f'user_keywords:{user_id}', *keywords)
-    sub_global_keywords(user_id, keywords=keywords)
+    new_keywords = set(keywords) - set(get_user_keywords(user_id))
+    sub_global_keywords(user_id, keywords=new_keywords)
+    r.sadd(f'user_keywords:{user_id}', *new_keywords)
 
 def get_user_keywords(user_id):
     r = redis.StrictRedis(connection_pool=pool)
@@ -94,9 +93,10 @@ def get_user_keywords(user_id):
 
 def delete_user_keywords(user_id, keywords):
     r = redis.StrictRedis(connection_pool=pool)
+    has_keywords = set(keywords) & set(get_user_keywords(user_id))
     refresh_tmp_keywords_ttl(r, user_id)
-    unsub_global_keywords(user_id, keywords=keywords)
-    r.srem(f'user_keywords:{user_id}', *keywords)
+    unsub_global_keywords(user_id, keywords=has_keywords)
+    r.srem(f'user_keywords:{user_id}', *has_keywords)
 
 def refresh_user_keywords_ttl(r, user_id):
     r.expire(f'user_keywords:{user_id}', USER_INFO_TTL)
