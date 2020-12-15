@@ -17,7 +17,7 @@ def format_keyword_confirm_message(user_id):
 
 
 def format_subscribed_keywords(user_id):
-    msg = f'==以下是您目前的訂閱清單==\n'
+    msg = f'以下是您目前的訂閱清單:\n'
     subscribed_keywords = Kw.get_subscribed(user_id)
     if subscribed_keywords and len(subscribed_keywords) > 0:
         msg += '\n'.join([f'{index+1}) {key}' for index, key in enumerate(subscribed_keywords)])
