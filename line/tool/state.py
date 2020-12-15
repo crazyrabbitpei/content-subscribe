@@ -22,8 +22,8 @@ class State:
             result['ok'] = True
         # 依照編號刪除現有訂閱清單中的關鍵字
         elif mtype == 'emoji_text' and emoji_start_at == 0:
-            delete_keys = get_delete_keys(Kw.get_subscribed(user_id), message)
-            deleted_keys = Kw.delete_keywords(user_id, delete_keys)
+            delete_keys = get_delete_keys(key_list=Kw.get_subscribed(user_id), delete_msg=message)
+            deleted_keys = Kw.unsubscribe(user_id, keywords=delete_keys)
             if len(deleted_keys) > 0:
                 result['msg'] = f'已移除關鍵字: {",".join(deleted_keys)}\n'
                 result['msg'] += Message.format_subscribed_keywords(user_id)
@@ -81,7 +81,7 @@ class State:
             result['msg'] = msg
         elif Line.has_text(mtype):
             tmp_keys = Kw.get_tmp(user_id)
-            delete_keys = get_delete_keys(tmp_keys, message)
+            delete_keys = get_delete_keys(key_list=tmp_keys, delete_msg=message)
             deleted_keys = Kw.delete_tmp(user_id, delete_keys)
             if len(deleted_keys) == len(tmp_keys):
                 state = '0'
@@ -143,6 +143,6 @@ def action(user, /, *, mtype, emoji_start_at=None, message=None):
     return result
 
 
-def get_delete_keys(tmp_keys, message):
-    return [tmp_keys[int(n)-1] for n in message.split(' ') if n.isnumeric() and int(n) > 0 and int(n) <= len(tmp_keys)]
+def get_delete_keys(*, key_list, delete_msg):
+    return [key_list[int(n)-1] for n in delete_msg.split(' ') if n.isnumeric() and int(n) > 0 and int(n) <= len(key_list)]
 
