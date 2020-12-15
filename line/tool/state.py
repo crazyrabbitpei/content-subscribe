@@ -110,8 +110,8 @@ COMMAND_STATES = {
 def action(user, /, *, mtype, emoji_start_at=None, message=None):
     def update_user_state(user, new_state):
         return LineUser.update_state(user, new_state)
-
-    message = message.strip()
+    if message:
+        message = message.strip()
     logger.info(
         f"User {user['user_id']} action, current state: {user['state']}, mtype: {mtype}, message: {message}")
     result = {
