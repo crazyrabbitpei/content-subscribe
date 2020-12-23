@@ -16,6 +16,7 @@ load_dotenv()
 
 from django.utils.translation import gettext_lazy as _
 from django.shortcuts import render
+from django.views.decorators.http import require_http_methods
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotFound
 from django.views.decorators.csrf import csrf_exempt
 
@@ -24,10 +25,8 @@ logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 
 # Create your views here.
 @csrf_exempt
+@require_http_methods(['POST'])
 def callback(request):
-    if request.method != 'POST':
-        return HttpResponseBadRequest()
-
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
 
@@ -46,6 +45,6 @@ def callback(request):
 
     return HttpResponse()
 
-def push_notice(request):
-    message = _('主動通知~')
-    push_message('000', f'{message}')
+
+def test(request):
+    return JsonResponse({'message': 'Hi'})
