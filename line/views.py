@@ -25,8 +25,8 @@ def record_meta(func):
 
 
 # Create your views here.
-@record_meta
 @csrf_exempt
+@record_meta
 @require_http_methods(['POST'])
 def callback(request):
     # get X-Line-Signature header value
