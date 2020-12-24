@@ -150,7 +150,7 @@ LOGGING = {
     },
     'formatters': {
         'simple': {
-            'format': '%(asctime)s %(name)s - %(levelname)s:%(message)s'
+            'format': "%(asctime)-15s %(name)-5s %(levelname)-8s IP: %(ip)-15s User: %(user)-8s %(message)s')"
         }
     },
     'root': {
