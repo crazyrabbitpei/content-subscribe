@@ -1,32 +1,27 @@
-from line.tool.line import reply_message, push_message, callback_handler
+from line.tool.line import callback_handler
 
 from linebot.exceptions import (
     InvalidSignatureError, LineBotApiError
 )
-
+from django.views.decorators.http import require_http_methods
+from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
+from django.views.decorators.csrf import csrf_exempt
 import logging
-import json
-import time
 import os
-import traceback
 import sys
-from collections import defaultdict
 from dotenv import load_dotenv
 load_dotenv()
 
-from django.utils.translation import gettext_lazy as _
-from django.shortcuts import render
-from django.views.decorators.http import require_http_methods
-from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotFound
-from django.views.decorators.csrf import csrf_exempt
 
 logger = logging.getLogger(__name__)
 logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
+
 
 # Create your views here.
 @csrf_exempt
 @require_http_methods(['POST'])
 def callback(request):
+    logger.info(f'{request.headers}, {request.META.REMOTE_ADDR}, {request.META.REMOTE_HOST}')
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
 
@@ -38,7 +33,7 @@ def callback(request):
     except InvalidSignatureError:
         logger.error("Invalid signature. Please check your channel access token/channel secret.")
         return HttpResponseForbidden()
-    except LineBotApiError as e:
+    except LineBotApiError:
         etype, value, tb = sys.exc_info()
         logger.error(f"Line bot api error {etype}", exc_info=True)
         return HttpResponseBadRequest()
@@ -47,4 +42,5 @@ def callback(request):
 
 
 def test(request):
+    logger.info(f'{request.headers}, {request.META.REMOTE_ADDR}, {request.META.REMOTE_HOST}')
     return JsonResponse({'message': 'Hi'})
