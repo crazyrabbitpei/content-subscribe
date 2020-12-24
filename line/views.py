@@ -12,16 +12,23 @@ import sys
 from dotenv import load_dotenv
 load_dotenv()
 
-
 logger = logging.getLogger(__name__)
 logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 
 
+def record_meta(func):
+    def wrap(*args, **kwargs):
+        request = kwargs['request']
+        logger.info(f"{request.headers}, {request.META['REMOTE_ADDR']}, {request.META['REMOTE_HOST']}")
+        return func(*args, **kwargs)
+    return wrap
+
+
 # Create your views here.
+@record_meta
 @csrf_exempt
 @require_http_methods(['POST'])
 def callback(request):
-    logger.info(f"{request.headers}, {request.META['REMOTE_ADDR']}, {request.META['REMOTE_HOST']}")
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
 
@@ -41,6 +48,6 @@ def callback(request):
     return HttpResponse()
 
 
+@record_meta
 def test(request):
-    logger.info(f"{request.headers}, {request.META['REMOTE_ADDR']}, {request.META['REMOTE_HOST']}")
     return JsonResponse({'message': 'Hi'})
