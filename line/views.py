@@ -18,7 +18,7 @@ logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 
 def record_meta(func):
     def wrap(*args, **kwargs):
-        request = kwargs['request']
+        request = args[0]
         logger.info(f"{request.headers}, {request.META['REMOTE_ADDR']}, {request.META['REMOTE_HOST']}")
         return func(*args, **kwargs)
     return wrap
