@@ -21,7 +21,7 @@ logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 @csrf_exempt
 @require_http_methods(['POST'])
 def callback(request):
-    logger.info(f'{request.headers}, {request.META.REMOTE_ADDR}, {request.META.REMOTE_HOST}')
+    logger.info(f"{request.headers}, {request.META['REMOTE_ADDR']}, {request.META['REMOTE_HOST']}")
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
 
@@ -42,5 +42,5 @@ def callback(request):
 
 
 def test(request):
-    logger.info(f'{request.headers}, {request.META.REMOTE_ADDR}, {request.META.REMOTE_HOST}')
+    logger.info(f"{request.headers}, {request.META['REMOTE_ADDR']}, {request.META['REMOTE_HOST']}")
     return JsonResponse({'message': 'Hi'})
